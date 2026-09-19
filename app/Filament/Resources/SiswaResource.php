@@ -27,7 +27,16 @@ class SiswaResource extends Resource
 {
     protected static ?string $model = Siswa::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-users';
+
+    // 2. Ubah label di sidebar agar tidak ada akhiran "s"
+    protected static ?string $navigationLabel = 'Data Siswa';
+    protected static ?string $pluralModelLabel = 'Data Siswa';
+    // 3. Masukkan ke dalam grup dropdown (Folder)
+    protected static ?string $navigationGroup = 'Data Induk';
+
+    // 4. Atur urutan menu (angka lebih kecil = posisi lebih atas)
+    protected static ?int $navigationSort = 1;
 
     public static function form(Form $form): Form
     {

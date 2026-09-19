@@ -24,7 +24,17 @@ class SaranaPrasaranaResource extends Resource
 {
     protected static ?string $model = SaranaPrasarana::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-computer-desktop';
+
+    // 2. Ubah label di sidebar agar tidak ada akhiran "s"
+    protected static ?string $navigationLabel = 'Sarana Prasarana';
+    protected static ?string $pluralModelLabel = 'Sarana Prasarana';
+
+    // 3. Masukkan ke dalam grup dropdown (Folder)
+    protected static ?string $navigationGroup = 'Manajemen Web';
+
+    // 4. Atur urutan menu (angka lebih kecil = posisi lebih atas)
+    protected static ?int $navigationSort = 10;
 
     public static function form(Form $form): Form
     {

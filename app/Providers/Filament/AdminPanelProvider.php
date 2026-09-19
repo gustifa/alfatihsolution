@@ -28,6 +28,7 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
+            ->brandName('SMK N 1 Bukittinggi') // Tambahkan baris ini
             ->colors([
                 'primary' => Color::Amber,
             ])

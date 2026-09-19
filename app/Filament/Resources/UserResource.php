@@ -24,6 +24,12 @@ class UserResource extends Resource
     protected static ?string $model = User::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    // 3. Masukkan ke dalam grup dropdown (Folder)
+    protected static ?string $navigationGroup = 'Data Induk';
+
+    // 4. Atur urutan menu (angka lebih kecil = posisi lebih atas)
+    protected static ?int $navigationSort = 20;
+
 
     public static function form(Form $form): Form
     {
