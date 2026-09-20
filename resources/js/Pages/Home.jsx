@@ -13,11 +13,34 @@ export default function Home({ posts, programs }) {
     const { pengaturanWeb } = usePage().props;
     const dataPengaturan = pengaturanWeb || {};
 
+    // Deteksi gambar latar (hero) dari database
+    const gambarHero = dataPengaturan?.gambar_hero || dataPengaturan?.foto_hero
+        ? `/storage/${dataPengaturan.gambar_hero || dataPengaturan.foto_hero}`
+        : "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=2000";
+
     const namaSekolah = dataPengaturan.nama_sekolah || 'SMK Negeri 1 Bukittinggi';
     const slogan = dataPengaturan.slogan || 'Disiplin, Terampil, Berkarakter';
     const alamat = dataPengaturan.alamat || 'Jl. Pendidikan, Bukittinggi';
     const telepon = dataPengaturan.telepon || '(0752) XXXXX';
     const email = dataPengaturan.email || 'info@smkn1bukittinggi.sch.id';
+
+    // Menyiapkan array gambar. Jika kosong di database, pakai 1 gambar default.
+    const heroImages = Array.isArray(dataPengaturan?.gambar_hero) && dataPengaturan.gambar_hero.length > 0
+        ? dataPengaturan.gambar_hero 
+        : ["https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=2000"];
+
+    // State untuk indeks gambar yang sedang aktif
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+    // Berganti gambar otomatis setiap 5 detik
+    useEffect(() => {
+        if (heroImages.length > 1) {
+            const interval = setInterval(() => {
+                setCurrentImageIndex((prevIndex) => (prevIndex + 1) % heroImages.length);
+            }, 5000); 
+            return () => clearInterval(interval);
+        }
+    }, [heroImages.length]);
 
     
 
@@ -33,19 +56,51 @@ export default function Home({ posts, programs }) {
             {/* NAVBAR SECTION */}
             <Navbar />
 
-            {/* HERO SECTION */}
-            <div className="relative bg-blue-900 h-[500px] flex items-center justify-center text-center overflow-hidden">
-                <div className="absolute inset-0 opacity-20 bg-[url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=1000')] bg-cover bg-center"></div>
-                <motion.div initial="hidden" animate="visible" variants={fadeInUp} className="relative z-10 px-4">
-                    <h2 className="text-4xl md:text-6xl font-extrabold text-white mb-4 drop-shadow-lg">
+            {/* 1. HERO SECTION */}
+            <div className="relative h-[500px] flex items-center justify-center text-center overflow-hidden">
+                
+                {/* Latar Belakang Gambar Dinamis (Slider) */}
+                <AnimatePresence mode="popLayout">
+                    <motion.div
+                        key={currentImageIndex}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 1.5, ease: "easeInOut" }}
+                        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+                        style={{
+                            backgroundImage: `url('${
+                                heroImages[currentImageIndex].startsWith('http') 
+                                    ? heroImages[currentImageIndex] 
+                                    : '/storage/' + heroImages[currentImageIndex]
+                            }')`
+                        }}
+                    />
+                </AnimatePresence>
+                
+                {/* Overlay Biru Transparan agar teks tetap kontras */}
+                {/* <div className="absolute inset-0 bg-blue-900/80 mix-blend-multiply z-0"></div> */}
+                {/* Overlay Biru Gelap dipadukan dengan efek bayangan hitam agar teks sangat menyala */}
+                <div className="absolute inset-0 bg-blue-950/90 mix-blend-multiply z-0"></div>
+                <div className="absolute inset-0 bg-black/40 z-0"></div>
+
+                <motion.div 
+                    initial="hidden" animate="visible" variants={fadeInUp} 
+                    className="relative z-10 px-4 w-full max-w-5xl mx-auto"
+                >
+                    <h2 className="text-4xl md:text-6xl font-extrabold text-white mb-4 drop-shadow-lg leading-tight">
                         {dataPengaturan?.hero_title || 'Mencetak Generasi Siap Kerja'}
                     </h2>
-                    <p className="text-lg md:text-xl text-blue-100 max-w-2xl mx-auto mb-8 drop-shadow">
+                    <p className="text-lg md:text-xl text-blue-100 max-w-3xl mx-auto mb-8 drop-shadow">
                         {dataPengaturan?.hero_deskripsi || 'Pusat keunggulan vokasi yang mengedepankan akhlak mulia, kompetensi industri, dan kemandirian wirausaha.'}
                     </p>
                     <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-                        <a href="#berita" className="bg-yellow-500 text-blue-900 font-bold px-8 py-3 rounded-full hover:bg-yellow-400 hover:scale-105 transition shadow-lg">Berita Terbaru</a>
-                        <a href="#jurusan" className="bg-transparent border-2 border-white text-white font-bold px-8 py-3 rounded-full hover:bg-white hover:text-blue-900 hover:scale-105 transition shadow-lg">Jelajahi Jurusan</a>
+                        <a href="#berita" className="bg-yellow-500 text-blue-900 font-bold px-8 py-3 rounded-full hover:bg-yellow-400 hover:scale-105 transition shadow-lg">
+                            Berita Terbaru
+                        </a>
+                        <a href="#jurusan" className="bg-transparent border-2 border-white text-white font-bold px-8 py-3 rounded-full hover:bg-white hover:text-blue-900 hover:scale-105 transition shadow-lg">
+                            Jelajahi Jurusan
+                        </a>
                     </div>
                 </motion.div>
             </div>

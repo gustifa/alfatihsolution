@@ -20,6 +20,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Forms\Components\Textarea;
 
+
 class ProfilSekolahResource extends Resource
 {
     protected static ?string $model = ProfilSekolah::class;
@@ -105,6 +106,15 @@ class ProfilSekolahResource extends Resource
                         ->label('Misi Sekolah')
                         ->columnSpanFull(),
                 ]),
+
+                FileUpload::make('gambar_hero')
+                ->label('Gambar Latar Slider (Maks 10 Foto)')
+                ->image()
+                ->multiple() // Mengaktifkan upload banyak file
+                ->maxFiles(10) // Membatasi maksimal 10 foto
+                ->reorderable() // Bisa geser-geser urutan foto
+                ->directory('profil')
+                ->columnSpanFull(),
             Section::make('Struktur Organisasi')->schema([
                 FileUpload::make('foto_struktur_organisasi')
                     ->label('Bagan Struktur Organisasi (Gambar)')

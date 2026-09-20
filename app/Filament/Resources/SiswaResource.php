@@ -36,7 +36,7 @@ class SiswaResource extends Resource
     protected static ?string $navigationGroup = 'Data Induk';
 
     // 4. Atur urutan menu (angka lebih kecil = posisi lebih atas)
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 20;
 
     public static function form(Form $form): Form
     {

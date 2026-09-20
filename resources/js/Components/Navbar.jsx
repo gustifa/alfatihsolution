@@ -6,21 +6,32 @@ export default function Navbar() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     
     // Tarik data global langsung dari komponen
-    const { pengaturanWeb } = usePage().props;
+    // const { pengaturanWeb } = usePage().props;
+    // const dataPengaturan = pengaturanWeb || {};
+    const { pengaturanWeb, auth } = usePage().props;
     const dataPengaturan = pengaturanWeb || {};
 
     const namaSekolah = dataPengaturan.nama_sekolah || 'SMK Negeri 1 Bukittinggi';
     const slogan = dataPengaturan.slogan || 'Disiplin, Terampil, Berkarakter';
 
+
     return (
         <nav className="bg-blue-800 text-white shadow-lg sticky top-0 z-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between h-20 items-center">
-                    <div className="flex items-center space-x-3">
-                        {dataPengaturan.logo ? (
-                            <img src={`/storage/${dataPengaturan.logo}`} alt="Logo" className="w-10 h-10 md:w-12 md:h-12 object-contain bg-white rounded-full p-1 shadow-md" />
+                    {/* KIRI: Logo dan Nama Sekolah */}
+                    <div className="flex items-center space-x-3 md:space-x-4">
+                        {/* Render Logo Dinamis */}
+                        {dataPengaturan?.logo ? (
+                            <img 
+                                src={`/storage/${dataPengaturan.logo}`} 
+                                alt="Logo Sekolah" 
+                                className="w-12 h-12 md:w-14 md:h-14 object-contain bg-white rounded-full p-1 shadow-sm" 
+                            />
                         ) : (
-                            <div className="w-10 h-10 md:w-12 md:h-12 bg-white rounded-full flex items-center justify-center text-blue-800 font-bold text-lg md:text-xl shadow-md">SMK</div>
+                            <div className="w-12 h-12 md:w-14 md:h-14 bg-white rounded-full flex items-center justify-center text-blue-900 font-bold text-sm shadow-sm">
+                                SMK
+                            </div>
                         )}
                         <div>
                             <h1 className="text-sm md:text-xl font-bold tracking-wide uppercase line-clamp-1">{namaSekolah}</h1>
@@ -47,9 +58,9 @@ export default function Navbar() {
 
                         <a href="/#jurusan" className="hover:text-yellow-400 transition">Program</a>
                         <Link href="/kehadiran" className="hover:text-yellow-400 transition">Info Kehadiran</Link>
-                        <a href="/admin" className="bg-yellow-500 text-blue-900 px-5 py-2 rounded-full font-bold hover:bg-yellow-400 hover:scale-105 transition-transform shadow-md">
-                            Login Portal
-                        </a>
+                        <Link href="/admin" className="bg-yellow-500 text-blue-900 px-5 py-2 rounded-full font-bold hover:bg-yellow-400 transition shadow-md truncate max-w-[150px]">
+                            {auth?.user ? auth.user.name : 'Login Portal'}
+                        </Link>
                     </div>
 
                     {/* Tombol Mobile */}

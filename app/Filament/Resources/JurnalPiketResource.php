@@ -27,7 +27,13 @@ class JurnalPiketResource extends Resource
 {
     protected static ?string $model = JurnalPiket::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
+    // 3. Masukkan ke dalam grup dropdown (Folder)
+    protected static ?string $navigationGroup = 'Operasional & Presensi';
+
+    // 4. Atur urutan menu (angka lebih kecil = posisi lebih atas)
+    protected static ?int $navigationSort = 30;
+
 
     public static function form(Form $form): Form
     {
