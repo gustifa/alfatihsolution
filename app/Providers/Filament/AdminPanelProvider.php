@@ -33,6 +33,14 @@ class AdminPanelProvider extends PanelProvider
             // ->login(CustomLogin::class) // GANTI MENJADI INI
             ->brandName(fn () => \App\Models\ProfilSekolah::first()?->nama_sekolah ?? 'Portal Admin')
             // ->brandName('SMK N 1 Bukittinggi') // Tambahkan baris ini
+            // Tambahkan baris ini untuk Favicon Dinamis
+            ->favicon(function () {
+                // Ubah 'logo_sekolah' sesuai dengan nama kolom gambar logo di tabel Anda
+                $logo = \App\Models\ProfilSekolah::first()?->favicon; 
+                
+                // Jika ada logo di database, gunakan itu. Jika kosong, gunakan favicon bawaan web.
+                return $logo ? asset('storage/' . $logo) : asset('favicon.ico');
+            })
             ->colors([
                 'primary' => Color::Amber,
             ])

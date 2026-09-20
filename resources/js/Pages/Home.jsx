@@ -190,7 +190,9 @@ export default function Home({ posts, programs }) {
                             <h3 className="text-sm font-bold text-blue-600 uppercase tracking-widest mb-2">Informasi</h3>
                             <h2 className="text-3xl font-bold text-gray-900">Berita Sekolah Terkini</h2>
                         </div>
-                        <a href="#" className="hidden md:block text-blue-600 font-bold hover:underline">Lihat Semua Berita &rarr;</a>
+                        <Link href="/berita" className="text-blue-600 font-semibold hover:text-yellow-500 hover:underline transition">
+                            Lihat Semua Berita &rarr;
+                        </Link>
                     </motion.div>
 
                     {posts && posts.length > 0 ? (

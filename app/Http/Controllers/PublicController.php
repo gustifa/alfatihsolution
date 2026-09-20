@@ -36,4 +36,14 @@ class PublicController extends Controller
             'post' => $post,
         ]);
     }
+
+    public function berita()
+{
+    // Mengambil berita terbaru dengan paginasi (9 berita per halaman)
+    $posts = \App\Models\Post::latest()->paginate(9);
+    
+    return inertia('Berita', [
+        'posts' => $posts
+    ]);
+}
 }

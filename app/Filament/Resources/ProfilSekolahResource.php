@@ -19,6 +19,7 @@ use Filament\Forms\Components\TextInput; // Tambahkan ini di atas
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Repeater;
 
 
 class ProfilSekolahResource extends Resource
@@ -107,6 +108,21 @@ class ProfilSekolahResource extends Resource
                         ->columnSpanFull(),
                 ]),
 
+                // Di dalam form schema:
+                Repeater::make('tautan_penting')
+                    ->label('Manajemen Tautan Penting Footer')
+                    ->schema([
+                        TextInput::make('nama_tautan')
+                            ->label('Nama Tautan')
+                            ->required(),
+                        TextInput::make('url')
+                            ->label('Alamat URL / Rute')
+                            ->url() // Opsional, validasi URL
+                            ->required(),
+                    ])
+                    ->columns(2)
+                    ->collapsible(),
+
                 FileUpload::make('gambar_hero')
                 ->label('Gambar Latar Slider (Maks 10 Foto)')
                 ->image()
@@ -115,13 +131,13 @@ class ProfilSekolahResource extends Resource
                 ->reorderable() // Bisa geser-geser urutan foto
                 ->directory('profil')
                 ->columnSpanFull(),
-            Section::make('Struktur Organisasi')->schema([
-                FileUpload::make('foto_struktur_organisasi')
-                    ->label('Bagan Struktur Organisasi (Gambar)')
-                    ->image()
-                    ->directory('profil')
-                    ->columnSpanFull(),
-            ])
+                Section::make('Struktur Organisasi')->schema([
+                    FileUpload::make('foto_struktur_organisasi')
+                        ->label('Bagan Struktur Organisasi (Gambar)')
+                        ->image()
+                        ->directory('profil')
+                        ->columnSpanFull(),
+                ])
             ]);
     }
 

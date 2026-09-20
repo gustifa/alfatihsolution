@@ -11,5 +11,7 @@ class ProfilSekolah extends Model
     // Tambahkan blok kode ini
     protected $casts = [
         'gambar_hero' => 'array',
+        'tautan_penting' => 'array', // Tambahkan baris ini
     ];
+
 }

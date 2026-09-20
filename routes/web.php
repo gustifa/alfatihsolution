@@ -74,4 +74,6 @@ Route::get('/', function () {
     ]);
 });
 
+Route::get('/berita', [App\Http\Controllers\PublicController::class, 'berita'])->name('berita.index');
+
 
