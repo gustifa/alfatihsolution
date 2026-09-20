@@ -18,6 +18,8 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin; // <-- 1. Tambahkan import ini di atas
+// use App\Filament\Pages\Auth\CustomLogin; // Tambahkan ini di bagian atas (use)
+
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -28,7 +30,9 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
-            ->brandName('SMK N 1 Bukittinggi') // Tambahkan baris ini
+            // ->login(CustomLogin::class) // GANTI MENJADI INI
+            ->brandName(fn () => \App\Models\ProfilSekolah::first()?->nama_sekolah ?? 'Portal Admin')
+            // ->brandName('SMK N 1 Bukittinggi') // Tambahkan baris ini
             ->colors([
                 'primary' => Color::Amber,
             ])
