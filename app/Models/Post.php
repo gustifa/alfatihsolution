@@ -3,16 +3,33 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo; // <-- Pastikan menggunakan path import ini
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+// 1. Jalur Trait LogsActivity yang benar
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+
+// 2. Jalur LogOptions yang benar berdasarkan dokumentasi resmi Spatie v5
+use Spatie\Activitylog\Support\LogOptions;
 
 class Post extends Model
 {
-    // 1. Izinkan seluruh kolom untuk diisi (Mass Assignment)
+    // Aktifkan kembali trait ini
+    use LogsActivity; 
+
     protected $guarded = [];
 
-    // 2. Buat relasi ke tabel users sebagai 'author'
     public function author(): BelongsTo
     {
         return $this->belongsTo(User::class, 'author_id');
+    }
+
+    // Aktifkan kembali fungsi konfigurasi log ini
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll()
+            ->logOnlyDirty()
+            ->dontLogEmptyChanges() // <-- Ubah bagian ini
+            ->useLogName('Manajemen Berita');
     }
 }
