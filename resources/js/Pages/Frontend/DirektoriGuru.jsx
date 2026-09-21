@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Head, Link } from "@inertiajs/react";
+import { Head, Link, usePage } from "@inertiajs/react";
 import Navbar from "@/Components/Navbar";
 import Footer from "@/Components/Footer";
 import ScrollToTop from "@/Components/ScrollToTop"; // Import komponen tombol
@@ -7,6 +7,10 @@ import ScrollToTop from "@/Components/ScrollToTop"; // Import komponen tombol
 export default function DirektoriGuru({ dataGuru }) {
   // State untuk menyimpan data guru yang sedang diklik (jika null, modal tertutup)
   const [selectedGuru, setSelectedGuru] = useState(null);
+  // Mengambil data pengaturan web dari props global Inertia
+  const { pengaturanWeb } = usePage().props;
+  const dataPengaturan = pengaturanWeb || {};
+  const namaSekolah = dataPengaturan.nama_sekolah || "Sekolah";
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-between">
       <Head title="Direktori Guru & Staff" />
@@ -23,8 +27,8 @@ export default function DirektoriGuru({ dataGuru }) {
               Direktori Guru & Staff
             </h1>
             <p className="text-gray-600 max-w-2xl mx-auto text-sm md:text-base">
-              Tenaga pendidik dan kependidikan profesional yang berdedikasi di
-              SMK Negeri 1 Bukittinggi.
+              Tenaga pendidik dan kependidikan profesional yang berdedikasi di{" "}
+              {namaSekolah}.
             </p>
           </div>
         </div>

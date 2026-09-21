@@ -24,7 +24,7 @@ Route::get('/', function () {
         'statistik' => [
             'totalSiswa'   => Siswa::count(),
             'totalGuru'    => GuruStaff::count(),
-            'totalRombel'  => class_exists(Rombel::class) ? Rombel::count() : 0,
+            // 'totalRombel'  => class_exists(Rombel::class) ? Rombel::count() : 0,
             'totalProgram' => class_exists(ProgramKeahlian::class) ? ProgramKeahlian::count() : 0,
         ],
     ]);
