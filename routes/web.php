@@ -17,9 +17,12 @@ Route::get('/', function () {
     return Inertia::render('Home', [
         'posts' => Post::latest()->take(3)->get(),
         // Tambahkan baris ini untuk mengirim data profil ke komponen Home
-        'profil' => ProfilSekolah::first()
+        'profil' => ProfilSekolah::first(),
+        'programs' => ProgramKeahlian::all(), // Kirim data program ke React
+        'dataGuru' => GuruStaff::all() // Mengirim data guru ke halaman Home
     ]);
 });
+
 
 // Tambahkan baris ini untuk halaman baca artikel
 Route::get('/berita/{slug}', [PublicController::class, 'show'])->name('berita.show');
@@ -69,13 +72,6 @@ Route::get('/berita/{slug}', function ($slug) {
     ]);
 });
 
-Route::get('/', function () {
-    return Inertia::render('Home', [
-        'posts' => Post::latest()->take(3)->get(),
-        'programs' => ProgramKeahlian::all() // Kirim data program ke React
-    ]);
-});
-
 Route::get('/berita', [App\Http\Controllers\PublicController::class, 'berita'])->name('berita.index');
 
 Route::get('/guru-staf', function () {
@@ -92,8 +88,4 @@ Route::get('/siswa', function () {
     ]);
 });
 
-Route::get('/', function () {
-    return Inertia::render('Home', [
-        'dataGuru' => GuruStaff::all() // Mengirim data guru ke halaman Home
-    ]);
-});
+
