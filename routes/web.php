@@ -11,6 +11,7 @@ use App\Models\Post;
 use App\Models\ProgramKeahlian; // Tambahkan ini
 // Pastikan model sudah di-import
 use App\Models\Siswa;
+use App\Models\Rombel;            // Sesuaikan dengan model rombongan belajar Anda
 
 // Route::get('/', [PublicController::class, 'home'])->name('home');
 Route::get('/', function () {
@@ -19,7 +20,13 @@ Route::get('/', function () {
         // Tambahkan baris ini untuk mengirim data profil ke komponen Home
         'profil' => ProfilSekolah::first(),
         'programs' => ProgramKeahlian::all(), // Kirim data program ke React
-        'dataGuru' => GuruStaff::all() // Mengirim data guru ke halaman Home
+        'dataGuru' => GuruStaff::all(), // Mengirim data guru ke halaman Home
+        'statistik' => [
+            'totalSiswa'   => Siswa::count(),
+            'totalGuru'    => GuruStaff::count(),
+            'totalRombel'  => class_exists(Rombel::class) ? Rombel::count() : 0,
+            'totalProgram' => class_exists(ProgramKeahlian::class) ? ProgramKeahlian::count() : 0,
+        ],
     ]);
 });
 

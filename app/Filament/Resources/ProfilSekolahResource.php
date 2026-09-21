@@ -68,24 +68,24 @@ class ProfilSekolahResource extends Resource
                         ->columnSpanFull(),
                 ]),
 
-                Section::make('Statistik Data SMK')->schema([
-                TextInput::make('jumlah_siswa')
-                    ->label('Total Siswa')
-                    ->numeric()
-                    ->default(0),
-                TextInput::make('jumlah_guru')
-                    ->label('Total Guru & Staff')
-                    ->numeric()
-                    ->default(0),
-                TextInput::make('jumlah_rombel')
-                    ->label('Total Rombel / Kelas')
-                    ->numeric()
-                    ->default(0),
-                TextInput::make('jumlah_program')
-                    ->label('Program Keahlian')
-                    ->numeric()
-                    ->default(0),
-            ])->columns(4), // Menjadikannya 4 kolom sejajar agar hemat tempat
+            //     Section::make('Statistik Data SMK')->schema([
+            //     TextInput::make('jumlah_siswa')
+            //         ->label('Total Siswa')
+            //         ->numeric()
+            //         ->default(0),
+            //     TextInput::make('jumlah_guru')
+            //         ->label('Total Guru & Staff')
+            //         ->numeric()
+            //         ->default(0),
+            //     TextInput::make('jumlah_rombel')
+            //         ->label('Total Rombel / Kelas')
+            //         ->numeric()
+            //         ->default(0),
+            //     TextInput::make('jumlah_program')
+            //         ->label('Program Keahlian')
+            //         ->numeric()
+            //         ->default(0),
+            // ])->columns(4), // Menjadikannya 4 kolom sejajar agar hemat tempat
 
                 Section::make('Pengaturan Teks Beranda (Hero)')->schema([
                     TextInput::make('hero_title')
@@ -148,16 +148,16 @@ class ProfilSekolahResource extends Resource
                 TextColumn::make('id')
                 ->label('ID')
                 ->sortable(),
-            
+
                 TextColumn::make('visi')
                     ->label('Visi')
                     ->limit(50)
                     ->searchable(),
-                    
+
                 ImageColumn::make('foto_struktur_organisasi')
                     ->label('Struktur Organisasi')
                     ->square(),
-                    
+
                 TextColumn::make('updated_at')
                     ->label('Terakhir Diperbarui')
                     ->dateTime('d M Y H:i')

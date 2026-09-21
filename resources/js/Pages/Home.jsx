@@ -6,7 +6,17 @@ import Footer from "@/Components/Footer";
 import ScrollToTop from "@/Components/ScrollToTop"; // Import komponen tombol
 import { fadeInUp, staggerContainer } from "@/Components/Animations"; // Import animasi
 
-export default function Home({ posts, programs, dataGuru = [] }) {
+export default function Home({
+  posts,
+  programs,
+  dataGuru = [],
+  statistik = {},
+}) {
+  // Sediakan nilai cadangan (0) jika data belum tersedia
+  const totalSiswa = statistik.totalSiswa ?? 0;
+  const totalGuru = statistik.totalGuru ?? 0;
+  const totalRombel = statistik.totalRombel ?? 0;
+  const totalProgram = statistik.totalProgram ?? 0;
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const { pengaturanWeb } = usePage().props;
@@ -133,7 +143,7 @@ export default function Home({ posts, programs, dataGuru = [] }) {
           >
             <motion.div variants={fadeInUp} className="mb-6 md:mb-0">
               <div className="text-4xl md:text-5xl font-extrabold text-white mb-2">
-                {dataPengaturan?.jumlah_siswa || 0}
+                {totalSiswa}
               </div>
               <div className="text-blue-200 text-sm font-semibold uppercase tracking-wider">
                 Siswa Aktif
@@ -141,7 +151,7 @@ export default function Home({ posts, programs, dataGuru = [] }) {
             </motion.div>
             <motion.div variants={fadeInUp} className="mb-6 md:mb-0">
               <div className="text-4xl md:text-5xl font-extrabold text-white mb-2">
-                {dataPengaturan?.jumlah_guru || 0}
+                {totalGuru}
               </div>
               <div className="text-blue-200 text-sm font-semibold uppercase tracking-wider">
                 Guru & Staff
@@ -149,7 +159,7 @@ export default function Home({ posts, programs, dataGuru = [] }) {
             </motion.div>
             <motion.div variants={fadeInUp}>
               <div className="text-4xl md:text-5xl font-extrabold text-white mb-2">
-                {dataPengaturan?.jumlah_rombel || 0}
+                {totalRombel}
               </div>
               <div className="text-blue-200 text-sm font-semibold uppercase tracking-wider">
                 Rombongan Belajar
@@ -157,7 +167,7 @@ export default function Home({ posts, programs, dataGuru = [] }) {
             </motion.div>
             <motion.div variants={fadeInUp}>
               <div className="text-4xl md:text-5xl font-extrabold text-white mb-2">
-                {dataPengaturan?.jumlah_program || 0}
+                {totalProgram}
               </div>
               <div className="text-blue-200 text-sm font-semibold uppercase tracking-wider">
                 Program Keahlian
