@@ -9,13 +9,15 @@ use App\Models\GuruStaff;
 use App\Models\SaranaPrasarana;
 use App\Models\Post;
 use App\Models\ProgramKeahlian; // Tambahkan ini
+// Pastikan model sudah di-import
+use App\Models\Siswa;
 
 // Route::get('/', [PublicController::class, 'home'])->name('home');
 Route::get('/', function () {
     return Inertia::render('Home', [
         'posts' => Post::latest()->take(3)->get(),
         // Tambahkan baris ini untuk mengirim data profil ke komponen Home
-        'profil' => ProfilSekolah::first() 
+        'profil' => ProfilSekolah::first()
     ]);
 });
 
@@ -32,7 +34,7 @@ Route::get('/kiosk', function () {
 
 Route::get('/kehadiran', function () {
     $hariIni = now()->toDateString();
-    
+
     // Ambil data presensi hari ini, urutkan dari yang terbaru melakukan scan
     $presensiHariIni = Presensi::with('siswa')
         ->where('tanggal', $hariIni)
@@ -48,9 +50,9 @@ Route::get('/kehadiran', function () {
 Route::get('/profil', function () {
     return Inertia::render('Profil', [
         // Mengambil data profil pertama (karena sejarah/visi misi biasanya hanya 1 baris data)
-        'profil' => ProfilSekolah::first(), 
+        'profil' => ProfilSekolah::first(),
         // Mengambil semua data guru & staff
-        'guruStaff' => GuruStaff::orderBy('kategori')->get(), 
+        'guruStaff' => GuruStaff::orderBy('kategori')->get(),
         // Mengambil semua data fasilitas
         'sarpras' => SaranaPrasarana::all()
     ]);
@@ -61,7 +63,7 @@ Route::get('/profil', function () {
 Route::get('/berita/{slug}', function ($slug) {
     // Mencari berita berdasarkan slug, jika tidak ada kembalikan 404
     $post = Post::where('slug', $slug)->firstOrFail();
-    
+
     return Inertia::render('BeritaDetail', [
         'post' => $post
     ]);
@@ -76,4 +78,16 @@ Route::get('/', function () {
 
 Route::get('/berita', [App\Http\Controllers\PublicController::class, 'berita'])->name('berita.index');
 
+Route::get('/guru-staf', function () {
+    return Inertia::render('Frontend/DirektoriGuru', [
+        // Mengambil semua data guru, bisa diganti paginate(12) jika data sangat banyak
+        'dataGuru' => GuruStaff::all()
+    ]);
+});
 
+Route::get('/siswa', function () {
+    return Inertia::render('Frontend/DirektoriSiswa', [
+        // Mengambil semua data siswa
+        'dataSiswa' => Siswa::all()
+    ]);
+});
