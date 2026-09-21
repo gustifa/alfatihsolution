@@ -21,6 +21,7 @@ use BezhanSalleh\FilamentShield\FilamentShieldPlugin; // <-- 1. Tambahkan import
 // use App\Filament\Pages\Auth\CustomLogin; // Tambahkan ini di bagian atas (use)
 
 
+
 class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
@@ -36,8 +37,8 @@ class AdminPanelProvider extends PanelProvider
             // Tambahkan baris ini untuk Favicon Dinamis
             ->favicon(function () {
                 // Ubah 'logo_sekolah' sesuai dengan nama kolom gambar logo di tabel Anda
-                $logo = \App\Models\ProfilSekolah::first()?->favicon; 
-                
+                $logo = \App\Models\ProfilSekolah::first()?->favicon;
+
                 // Jika ada logo di database, gunakan itu. Jika kosong, gunakan favicon bawaan web.
                 return $logo ? asset('storage/' . $logo) : asset('favicon.ico');
             })

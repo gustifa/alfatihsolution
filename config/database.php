@@ -97,6 +97,12 @@ return [
             'prefix_indexes' => true,
             'search_path' => 'public',
             'sslmode' => env('DB_SSLMODE', 'prefer'),
+            // Tambahkan kode dump ini (pastikan menggunakan garis miring biasa)
+            'dump' => [
+               'dump_binary_path' => 'D:/nginx/pgsql/bin',
+               'use_single_transaction' => true,
+               'timeout' => 300,
+            ],
         ],
 
         'sqlsrv' => [
