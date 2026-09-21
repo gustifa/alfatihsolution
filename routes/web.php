@@ -91,3 +91,9 @@ Route::get('/siswa', function () {
         'dataSiswa' => Siswa::all()
     ]);
 });
+
+Route::get('/', function () {
+    return Inertia::render('Home', [
+        'dataGuru' => GuruStaff::all() // Mengirim data guru ke halaman Home
+    ]);
+});
