@@ -20,13 +20,14 @@ export default function DirektoriGuru({ dataGuru }) {
         <Navbar />
 
         {/* Header Banner ala Home.jsx */}
+        {/* Header Banner */}
         <div className="relative bg-slate-900 py-20 px-4 sm:px-6 lg:px-8 text-center text-white overflow-hidden shadow-inner">
           <div className="absolute inset-0 opacity-40 bg-gradient-to-r from-blue-900 to-indigo-900"></div>
           <div className="relative max-w-4xl mx-auto">
-            <h1 className="text-3xl md:text-4xl font-extrabold text-blue-900 mb-4">
+            <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight">
               Direktori Guru & Staff
             </h1>
-            <p className="text-gray-600 max-w-2xl mx-auto text-sm md:text-base">
+            <p className="mt-4 text-lg text-gray-300">
               Tenaga pendidik dan kependidikan profesional yang berdedikasi di{" "}
               {namaSekolah}.
             </p>
