@@ -12,23 +12,23 @@ use App\Models\ProgramKeahlian; // Tambahkan ini
 // Pastikan model sudah di-import
 use App\Models\Siswa;
 use App\Models\Rombel;            // Sesuaikan dengan model rombongan belajar Anda
+use Illuminate\Support\Facades\Schema;
 
 // Route::get('/', [PublicController::class, 'home'])->name('home');
 Route::get('/', function () {
     return Inertia::render('Home', [
         'posts' => Post::latest()->take(3)->get(),
-        // Tambahkan baris ini untuk mengirim data profil ke komponen Home
         'profil' => ProfilSekolah::first(),
-        'programs' => ProgramKeahlian::all(), // Kirim data program ke React
-        'dataGuru' => GuruStaff::all(), // Mengirim data guru ke halaman Home
+        'programs' => ProgramKeahlian::all(),
+        'dataGuru' => GuruStaff::all(),
         'statistik' => [
-            'totalSiswa'   => Siswa::count(),
-            'totalGuru'    => GuruStaff::count(),
-            // 'totalRombel'  => class_exists(Rombel::class) ? Rombel::count() : 0,
-            'totalProgram' => class_exists(ProgramKeahlian::class) ? ProgramKeahlian::count() : 0,
+            'totalSiswa'   => Schema::hasTable('siswas') ? Siswa::count() : 0,
+            'totalGuru'    => Schema::hasTable('guru_staff') ? GuruStaff::count() : 0,
+            'totalRombel'  => Schema::hasTable('rombels') ? Rombel::count() : 0,
+            'totalProgram' => Schema::hasTable('program_keahlians') ? ProgramKeahlian::count() : 0,
         ],
     ]);
-});
+})->name('home');
 
 
 // Tambahkan baris ini untuk halaman baca artikel

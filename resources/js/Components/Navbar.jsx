@@ -97,12 +97,12 @@ export default function Navbar() {
             >
               Info Kehadiran
             </Link>
-            <Link
+            <a
               href="/admin"
               className="bg-yellow-500 text-blue-900 px-5 py-2 rounded-full font-bold hover:bg-yellow-400 transition shadow-md truncate max-w-[150px]"
             >
               {auth?.user ? auth.user.name : "Login Portal"}
-            </Link>
+            </a>
           </div>
 
           {/* Tombol Mobile */}
