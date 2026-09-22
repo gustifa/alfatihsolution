@@ -310,14 +310,20 @@ export default function Home({
             whileInView="visible"
             viewport={{ once: true, margin: "-50px" }}
             variants={staggerContainer}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto"
+            className={`max-w-6xl mx-auto gap-8 ${
+              programs && programs.length === 1
+                ? "flex justify-center"
+                : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+            }`}
           >
             {programs && programs.length > 0 ? (
               programs.map((program) => (
                 <motion.div
                   key={program.id}
                   variants={fadeInUp}
-                  className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 border-t-4 border-blue-600 text-center"
+                  className={`bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 border-t-4 border-blue-600 text-center ${
+                    programs.length === 1 ? "w-full max-w-md" : ""
+                  }`}
                 >
                   <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6 overflow-hidden">
                     {program.icon ? (
@@ -339,7 +345,7 @@ export default function Home({
                 </motion.div>
               ))
             ) : (
-              <div className="col-span-full text-center text-gray-500">
+              <div className="w-full text-center text-gray-500">
                 Belum ada data program keahlian.
               </div>
             )}
@@ -379,13 +385,19 @@ export default function Home({
               whileInView="visible"
               viewport={{ once: true }}
               variants={staggerContainer}
-              className="grid grid-cols-1 md:grid-cols-3 gap-8"
+              className={`gap-8 ${
+                posts.length === 1
+                  ? "flex justify-center"
+                  : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+              }`}
             >
               {posts.map((post) => (
                 <motion.div
                   key={post.id}
                   variants={fadeInUp}
-                  className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group"
+                  className={`bg-white rounded-xl shadow-md overflow-hidden hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group ${
+                    posts.length === 1 ? "w-full max-w-md" : ""
+                  }`}
                 >
                   <div className="h-48 bg-gray-200 overflow-hidden relative">
                     <div className="absolute inset-0 bg-blue-900 opacity-0 group-hover:opacity-20 transition"></div>
