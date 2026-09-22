@@ -19,7 +19,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-20 items-center">
           {/* KIRI: Logo dan Nama Sekolah */}
-          <div className="flex items-center space-x-3 md:space-x-4">
+          <Link className="flex items-center space-x-3 md:space-x-4">
             {/* Render Logo Dinamis */}
             {dataPengaturan?.logo ? (
               <img
@@ -40,7 +40,7 @@ export default function Navbar() {
                 {slogan}
               </p>
             </div>
-          </div>
+          </Link>
 
           {/* Menu Desktop */}
           <div className="hidden md:flex space-x-8 text-sm font-medium items-center">
