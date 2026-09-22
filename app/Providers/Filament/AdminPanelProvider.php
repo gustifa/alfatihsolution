@@ -30,6 +30,13 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
+            ->navigationGroups([
+                'Data Induk',
+                'Manajemen Web',
+                'Operasional & Presensi',
+                'Filament Shield',
+                'Sistem',
+            ])
             ->login()
             // ->login(CustomLogin::class) // GANTI MENJADI INI
             ->brandName(fn () => \App\Models\ProfilSekolah::first()?->nama_sekolah ?? 'Portal Admin')

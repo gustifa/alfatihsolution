@@ -17,6 +17,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
 use Filament\Tables\Columns\TextColumn;
+use App\Models\Rombel;
 
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
@@ -47,20 +48,27 @@ class SiswaResource extends Resource
                     ->label('NIS / NISN')
                     ->required()
                     ->unique(ignoreRecord: true),
-                
+
                 TextInput::make('nama')
                     ->label('Nama Lengkap')
                     ->required(),
-                
-                Select::make('kelas')
+
+                // Select::make('kelas')
+                //     ->label('Kelas / Rombel')
+                //     ->options([
+                //         'X TITL 1' => 'X TITL 1',
+                //         'X TITL 2' => 'X TITL 2',
+                //         'XI TITL' => 'XI TITL',
+                //         'XII TITL' => 'XII TITL',
+                //     ])
+                //     ->searchable()
+                //     ->required(),
+
+                Select::make('kelas') // sesuaikan dengan nama kolom kelas di tabel 'siswas' Anda
                     ->label('Kelas / Rombel')
-                    ->options([
-                        'X TITL 1' => 'X TITL 1',
-                        'X TITL 2' => 'X TITL 2',
-                        'XI TITL' => 'XI TITL',
-                        'XII TITL' => 'XII TITL',
-                    ])
+                    ->options(Rombel::pluck('nama_rombel', 'nama_rombel'))
                     ->searchable()
+                    ->preload()
                     ->required(),
 
                 TextInput::make('barcode_uid')
@@ -126,7 +134,7 @@ class SiswaResource extends Resource
                                 // Berikan hak akses sebagai Siswa
                                 // Pastikan role 'panel_user' atau 'Siswa' sudah dibuat di Filament Shield
                                 $user->assignRole('Siswa');
-                                
+
                                 $berhasil++;
                             } else {
                                 $dilewati++;

@@ -25,6 +25,10 @@ class GuruStaffResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    // 2. Ubah label di sidebar agar tidak ada akhiran "s"
+    protected static ?string $navigationLabel = 'Guru & Staff';
+    protected static ?string $pluralModelLabel = 'Guru & Staff';
+
     // 3. Masukkan ke dalam grup dropdown (Folder)
     protected static ?string $navigationGroup = 'Data Induk';
 
@@ -55,20 +59,20 @@ class GuruStaffResource extends Resource
                 ImageColumn::make('foto')
                 ->label('Foto')
                 ->circular(),
-                
+
                 TextColumn::make('nama')
                     ->label('Nama Lengkap')
                     ->searchable()
                     ->sortable(),
-                    
+
                 TextColumn::make('nip')
                     ->label('NIP / NIY')
                     ->searchable(),
-                    
+
                 TextColumn::make('jabatan')
                     ->label('Jabatan')
                     ->searchable(),
-                    
+
                 TextColumn::make('kategori')
                     ->label('Kategori')
                     ->badge()
