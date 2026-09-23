@@ -17,7 +17,10 @@ use Illuminate\Support\Facades\Schema;
 // Route::get('/', [PublicController::class, 'home'])->name('home');
 Route::get('/', function () {
     return Inertia::render('Home', [
-        'posts' => Post::latest()->take(3)->get(),
+        'posts' => Post::where('status', 'published') // sesuaikan nilai 'published' sesuai value di database
+            ->latest()
+            ->take(3)
+            ->get(),
         'profil' => ProfilSekolah::first(),
         'programs' => ProgramKeahlian::all(),
         'dataGuru' => GuruStaff::all(),
@@ -70,12 +73,24 @@ Route::get('/profil', function () {
 
 
 
-Route::get('/berita/{slug}', function ($slug) {
+Route::get('/berita/{slug}', function ($slug, Post $post) {
+    // Ambil postingan terkait berdasarkan category_id yang sama (selain postingan saat ini)
+    $relatedPosts = Post::where('category_id', $post->category_id)
+        ->where('id', '!=', $post->id)
+        ->where('status', 'published')
+        ->when($post->category_id, function ($query) use ($post) {
+            $query->where('category_id', $post->category_id);
+        })
+        ->latest()
+        ->take(3)
+        ->get();
     // Mencari berita berdasarkan slug, jika tidak ada kembalikan 404
     $post = Post::where('slug', $slug)->firstOrFail();
 
+
     return Inertia::render('BeritaDetail', [
-        'post' => $post
+        'post' => $post->load(['category', 'tags', 'author']),
+        'relatedPosts' => $relatedPosts,
     ]);
 });
 

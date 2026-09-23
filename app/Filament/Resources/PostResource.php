@@ -16,11 +16,13 @@ use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\RichEditor;
+use FilamentTiptapEditor\TiptapEditor;
+use FilamentTiptapEditor\Enums\TiptapOutput;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Illuminate\Support\Str; // <-- Tambahkan baris ini di sini
 use Filament\Forms\Components\Hidden;
+use Filament\Tables\Columns\TextColumn;
 
 
 class PostResource extends Resource
@@ -40,8 +42,8 @@ class PostResource extends Resource
         return $form
             ->schema([
                 // Tambahkan baris ini untuk otomatis mengisi author_id
-        Hidden::make('author_id')
-            ->default(fn () => auth()->id()),
+            Hidden::make('author_id')
+                ->default(fn () => auth()->id()),
                         Grid::make(3)->schema([
                     // Kolom Kiri: Konten Utama (Lebar 2/3)
                     Section::make('Konten Berita')
@@ -51,20 +53,25 @@ class PostResource extends Resource
                                 ->required()
                                 ->live(onBlur: true)
                                 ->afterStateUpdated(fn (string $operation, $state, Forms\Set $set) => $operation === 'create' ? $set('slug', Str::slug($state)) : null),
-                            
+
                             TextInput::make('slug')
                                 ->required()
                                 ->unique(ignoreRecord: true),
-                                
-                            RichEditor::make('content')
-                                ->label('Isi Berita')
-                                ->required()
-                                ->fileAttachmentsDirectory('posts/images')
-                                ->columnSpanFull(),
+
+                            TiptapEditor::make('content')
+                            ->label('Isi Berita')
+                            ->profile('default')
+                            ->output(TiptapOutput::Html)
+                            ->disk('public')
+                            ->directory('posts/content-images')
+                            ->maxContentWidth('5xl')
+                            ->required()
+                            ->columnSpanFull(),
                         ])->columnSpan(2),
 
                     // Kolom Kanan: Pengaturan & SEO (Lebar 1/3)
                     Grid::make(1)->schema([
+
                         Section::make('Publikasi')
                             ->schema([
                                 Select::make('status')
@@ -82,7 +89,40 @@ class PostResource extends Resource
                                     ->image()
                                     ->directory('posts/thumbnails'),
                             ]),
-                            
+                        // Letakkan di dalam skema form (misalnya pada bagian publikasi atau sidebar form)
+                        Select::make('category_id')
+                            ->label('Kategori')
+                            ->relationship('category', 'name')
+                            ->searchable()
+                            ->preload()
+                            ->createOptionForm([
+                                \Filament\Forms\Components\TextInput::make('name')
+                                    ->label('Nama Kategori')
+                                    ->required()
+                                    ->live(onBlur: true)
+                                    ->afterStateUpdated(fn ($state, callable $set) => $set('slug', Str::slug($state))),
+                                \Filament\Forms\Components\TextInput::make('slug')
+                                    ->required()
+                                    ->unique(table: 'categories', column: 'slug'),
+                            ]),
+
+                        Select::make('tags')
+                            ->label('Tag Berita')
+                            ->multiple()
+                            ->relationship('tags', 'name')
+                            ->searchable()
+                            ->preload()
+                            ->createOptionForm([
+                                \Filament\Forms\Components\TextInput::make('name')
+                                    ->label('Nama Tag')
+                                    ->required()
+                                    ->live(onBlur: true)
+                                    ->afterStateUpdated(fn ($state, callable $set) => $set('slug', Str::slug($state))),
+                                \Filament\Forms\Components\TextInput::make('slug')
+                                    ->required()
+                                    ->unique(table: 'tags', column: 'slug'),
+                            ]),
+
                         Section::make('Pengaturan SEO')
                             ->schema([
                                 TextInput::make('meta_title')
@@ -93,7 +133,13 @@ class PostResource extends Resource
                                 TextInput::make('meta_keywords')
                                     ->label('Meta Keywords'),
                             ]),
+
+
                     ])->columnSpan(1),
+
+
+
+
                 ])
             ]);
     }
@@ -103,15 +149,26 @@ class PostResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\ImageColumn::make('featured_image')->label('Gambar'),
-            Tables\Columns\TextColumn::make('title')->searchable()->label('Judul'),
-            Tables\Columns\BadgeColumn::make('status')
-                ->colors([
-                    'danger' => 'draft',
-                    'success' => 'published',
-                    'warning' => 'archived',
-                ]),
-            Tables\Columns\TextColumn::make('author.name')->label('Penulis'),
-            Tables\Columns\TextColumn::make('published_at')->dateTime()->sortable(),
+                Tables\Columns\TextColumn::make('title')->searchable()->label('Judul'),
+                Tables\Columns\BadgeColumn::make('status')
+                    ->colors([
+                        'danger' => 'draft',
+                        'success' => 'published',
+                        'warning' => 'archived',
+                    ]),
+                Tables\Columns\TextColumn::make('author.name')->label('Penulis'),
+                Tables\Columns\TextColumn::make('published_at')->dateTime()->sortable(),
+
+                TextColumn::make('category.name')
+                    ->label('Kategori')
+                    ->sortable()
+                    ->badge(),
+
+                TextColumn::make('tags.name')
+                    ->label('Tag')
+                    ->badge()
+                    ->separator(', '),
+
             ])
             ->filters([
                 //

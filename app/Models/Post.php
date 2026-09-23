@@ -10,11 +10,12 @@ use Spatie\Activitylog\Models\Concerns\LogsActivity;
 
 // 2. Jalur LogOptions yang benar berdasarkan dokumentasi resmi Spatie v5
 use Spatie\Activitylog\Support\LogOptions;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Post extends Model
 {
     // Aktifkan kembali trait ini
-    use LogsActivity; 
+    use LogsActivity;
 
     protected $guarded = [];
 
@@ -31,5 +32,15 @@ class Post extends Model
             ->logOnlyDirty()
             ->dontLogEmptyChanges() // <-- Ubah bagian ini
             ->useLogName('Manajemen Berita');
+    }
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class);
+    }
+
+    public function tags(): BelongsToMany
+    {
+        return $this->belongsToMany(Tag::class);
     }
 }

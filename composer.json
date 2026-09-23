@@ -8,6 +8,7 @@
     "require": {
         "php": "^8.3",
         "artesaos/seotools": "^1.4",
+        "awcodes/filament-tiptap-editor": "^3.5",
         "bezhansalleh/filament-shield": "^3.2",
         "filament/filament": "^3.2",
         "inertiajs/inertia-laravel": "^3.3",
