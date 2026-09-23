@@ -16,7 +16,6 @@ return new class extends Migration
             $table->foreignId('post_id')->constrained('posts')->cascadeOnDelete();
             $table->foreignId('tag_id')->constrained('tags')->cascadeOnDelete();
             $table->timestamps();
-
             // Mencegah duplikasi tag yang sama pada satu postingan
             $table->unique(['post_id', 'tag_id']);
         });
