@@ -12,6 +12,13 @@ class Siswa extends Model
     use HasFactory;
 
     protected $guarded = [];
+    // protected $fillable = [
+    //     'nis',
+    //     'nama',
+    //     'jenis_kelamin',
+    //     'rombel_id',
+    //     'status',
+    // ];
 
     public function presensi(): HasMany
     {

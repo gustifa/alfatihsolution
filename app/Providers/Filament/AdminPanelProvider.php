@@ -19,6 +19,7 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin; // <-- 1. Tambahkan import ini di atas
 // use App\Filament\Pages\Auth\CustomLogin; // Tambahkan ini di bagian atas (use)
+use App\Filament\Widgets\DashboardStatsOverview;
 
 
 
@@ -61,6 +62,7 @@ class AdminPanelProvider extends PanelProvider
             ->widgets([
                 Widgets\AccountWidget::class,
                 // Widgets\FilamentInfoWidget::class,
+                // DashboardStatsOverview::class,
             ])
             ->middleware([
                 EncryptCookies::class,
