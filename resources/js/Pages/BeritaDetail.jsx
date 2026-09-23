@@ -7,47 +7,31 @@ import ScrollToTop from "@/Components/ScrollToTop";
 import { fadeInUp, staggerContainer } from "@/Components/Animations";
 
 export default function BeritaDetail({ post, relatedPosts = [] }) {
-  const { url, props } = usePage();
-  const dataPengaturan = props.pengaturanWeb || {};
-  const namaSekolah = dataPengaturan.nama_sekolah || "SDN 59 Payakumbuh";
-
-  // Memastikan Base URL selalu valid dan absolut (HTTPS)
-  const baseUrl =
-    typeof window !== "undefined"
-      ? window.location.origin
-      : props.appUrl || "https://sdn59.sch.id";
-
-  const fullUrl = `${baseUrl}${url}`;
-  const [currentUrl, setCurrentUrl] = useState(fullUrl);
+  const [currentUrl, setCurrentUrl] = useState("");
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     setCurrentUrl(window.location.href);
   }, []);
 
-  const tanggalFormat = post?.created_at
-    ? new Date(post.created_at).toLocaleDateString("id-ID", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })
-    : "";
+  const { pengaturanWeb } = usePage().props;
+  const dataPengaturan = pengaturanWeb || {};
+  const namaSekolah = dataPengaturan.nama_sekolah || "Sekolah";
 
-  // Gambar thumbnail wajib berupa URL absolut lengkap dengan https://
-  const gambarThumbnail = post?.featured_image
-    ? post.featured_image.startsWith("http")
-      ? post.featured_image
-      : `${baseUrl}/storage/${post.featured_image}`
-    : dataPengaturan?.logo
-      ? `${baseUrl}/storage/${dataPengaturan.logo}`
-      : `${baseUrl}/images/default-berita.jpg`;
+  const tanggalFormat = new Date(post.created_at).toLocaleDateString("id-ID", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
+  const gambarThumbnail = post.featured_image
+    ? `${typeof window !== "undefined" ? window.location.origin : ""}/storage/${post.featured_image}`
+    : `https://ui-avatars.com/api/?name=${encodeURIComponent(post.title)}&size=800&background=0D8ABC&color=fff`;
 
   const metaDeskripsi =
-    post?.meta_description ||
-    (post?.content
-      ? post.content.replace(/<[^>]*>?/gm, "").substring(0, 160)
-      : "Baca selengkapnya mengenai berita ini di situs resmi sekolah kami.");
+    post.meta_description ||
+    "Baca selengkapnya mengenai berita ini di situs resmi sekolah kami.";
 
   // Salin Tautan ke Clipboard
   const handleCopyLink = () => {
@@ -61,7 +45,7 @@ export default function BeritaDetail({ post, relatedPosts = [] }) {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: post?.title,
+          title: post.title,
           text: metaDeskripsi,
           url: currentUrl,
         });
@@ -76,9 +60,7 @@ export default function BeritaDetail({ post, relatedPosts = [] }) {
   return (
     <div className="bg-gray-50 min-h-screen font-sans text-gray-800 scroll-smooth relative overflow-hidden">
       <Head>
-        <title>{`${post?.title || "Berita"} - ${namaSekolah}`}</title>
-        <meta name="description" content={metaDeskripsi} />
-
+        <title>{`${post.title} - ${namaSekolah}`}</title>
         {dataPengaturan.favicon && (
           <link
             rel="icon"
@@ -87,10 +69,10 @@ export default function BeritaDetail({ post, relatedPosts = [] }) {
           />
         )}
 
-        {/* OPEN GRAPH KHUSUS WHATSAPP & MEDIA SOSIAL */}
+        {/* OPEN GRAPH */}
         <meta property="og:type" content="article" />
         <meta property="og:site_name" content={namaSekolah} />
-        <meta property="og:title" content={post?.title} />
+        <meta property="og:title" content={post.title} />
         <meta property="og:description" content={metaDeskripsi} />
         <meta property="og:url" content={currentUrl} />
         <meta property="og:image" content={gambarThumbnail} />
@@ -100,7 +82,7 @@ export default function BeritaDetail({ post, relatedPosts = [] }) {
 
         {/* TWITTER / X CARD */}
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={post?.title} />
+        <meta name="twitter:title" content={post.title} />
         <meta name="twitter:description" content={metaDeskripsi} />
         <meta name="twitter:image" content={gambarThumbnail} />
       </Head>
@@ -118,7 +100,7 @@ export default function BeritaDetail({ post, relatedPosts = [] }) {
           <div className="h-64 sm:h-96 w-full bg-blue-900 relative group">
             <img
               src={gambarThumbnail}
-              alt={post?.title}
+              alt={post.title}
               className="w-full h-full object-cover opacity-90 transition-transform duration-700 group-hover:scale-105"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent"></div>
@@ -134,10 +116,10 @@ export default function BeritaDetail({ post, relatedPosts = [] }) {
 
             <div className="absolute bottom-0 left-0 p-6 sm:p-10 w-full">
               <span className="bg-yellow-500 text-blue-900 text-xs font-bold px-3.5 py-1 rounded-full uppercase tracking-widest shadow-md">
-                {post?.category?.name || "Informasi"}
+                {post.category?.name || "Informasi"}
               </span>
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white mt-5 leading-tight drop-shadow-lg">
-                {post?.title}
+                {post.title}
               </h1>
             </div>
           </div>
@@ -175,7 +157,7 @@ export default function BeritaDetail({ post, relatedPosts = [] }) {
                 />
               </svg>
               <span>
-                Oleh {post?.author?.name || post?.user?.name || "Admin / Humas"}
+                Oleh {post.author?.name || post.user?.name || "Admin / Humas"}
               </span>
             </div>
           </div>
@@ -188,11 +170,11 @@ export default function BeritaDetail({ post, relatedPosts = [] }) {
                 [&_img]:mx-auto [&_img]:rounded-2xl [&_img]:shadow-md
                 [&_figcaption]:mt-3 [&_figcaption]:text-sm [&_figcaption]:text-gray-500 [&_figcaption]:italic [&_figcaption]:text-center
                 [&_ol]:list-decimal [&_ul]:list-disc [&_ol]:ml-6 [&_ul]:ml-6 [&_li]:mb-1"
-              dangerouslySetInnerHTML={{ __html: post?.content || "" }}
+              dangerouslySetInnerHTML={{ __html: post.content }}
             />
 
             {/* Tag Berita */}
-            {post?.tags && post.tags.length > 0 && (
+            {post.tags && post.tags.length > 0 && (
               <div className="mt-10 pt-6 border-t border-gray-100 flex flex-wrap items-center gap-2">
                 <span className="text-sm font-semibold text-gray-500 mr-2">
                   Tag Terkait:
@@ -208,7 +190,7 @@ export default function BeritaDetail({ post, relatedPosts = [] }) {
               </div>
             )}
 
-            {/* FITUR BAGIKAN ARTIKEL */}
+            {/* FITUR BAGIKAN ARTIKEL MODERN */}
             <div className="mt-10 pt-8 border-t border-gray-100">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
@@ -223,7 +205,7 @@ export default function BeritaDetail({ post, relatedPosts = [] }) {
                 <div className="flex flex-wrap items-center gap-2">
                   {/* WhatsApp */}
                   <a
-                    href={`https://api.whatsapp.com/send?text=${encodeURIComponent((post?.title || "") + "\n\n" + currentUrl)}`}
+                    href={`https://api.whatsapp.com/send?text=${encodeURIComponent(post.title + "\n\n" + currentUrl)}`}
                     target="_blank"
                     rel="noreferrer"
                     title="Bagikan ke WhatsApp"
@@ -240,7 +222,7 @@ export default function BeritaDetail({ post, relatedPosts = [] }) {
 
                   {/* Telegram */}
                   <a
-                    href={`https://t.me/share/url?url=${encodeURIComponent(currentUrl)}&text=${encodeURIComponent(post?.title || "")}`}
+                    href={`https://t.me/share/url?url=${encodeURIComponent(currentUrl)}&text=${encodeURIComponent(post.title)}`}
                     target="_blank"
                     rel="noreferrer"
                     title="Bagikan ke Telegram"
@@ -270,7 +252,7 @@ export default function BeritaDetail({ post, relatedPosts = [] }) {
 
                   {/* X / Twitter */}
                   <a
-                    href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(currentUrl)}&text=${encodeURIComponent(post?.title || "")}`}
+                    href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(currentUrl)}&text=${encodeURIComponent(post.title)}`}
                     target="_blank"
                     rel="noreferrer"
                     title="Bagikan ke X"
@@ -300,7 +282,7 @@ export default function BeritaDetail({ post, relatedPosts = [] }) {
 
                   {/* Email */}
                   <a
-                    href={`mailto:?subject=${encodeURIComponent(post?.title || "")}&body=${encodeURIComponent(metaDeskripsi + "\n\nBaca artikel selengkapnya: " + currentUrl)}`}
+                    href={`mailto:?subject=${encodeURIComponent(post.title)}&body=${encodeURIComponent(metaDeskripsi + "\n\nBaca artikel selengkapnya: " + currentUrl)}`}
                     title="Kirim via Email"
                     className="w-10 h-10 rounded-xl bg-amber-500 hover:bg-amber-600 text-white flex items-center justify-center transition-all hover:scale-110 shadow-sm"
                   >
