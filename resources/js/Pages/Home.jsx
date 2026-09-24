@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Head, Link } from "@inertiajs/react";
+import { Head } from "@inertiajs/react";
 
 export default function Home({
   services = [],
@@ -8,7 +8,7 @@ export default function Home({
   testimonials = [],
   posts = [],
 }) {
-  // State Menu & Modal
+  // State Navigasi & Modal
   const [mobileMenu, setMobileMenu] = useState(false);
   const [modalTracking, setModalTracking] = useState(false);
 
@@ -18,7 +18,7 @@ export default function Home({
   const [trackResult, setTrackResult] = useState(null);
   const [trackError, setTrackError] = useState(null);
 
-  // State Form Pemesanan
+  // State Formulir Pemesanan & Konsultasi
   const [formOrder, setFormOrder] = useState({
     nama_klien: "",
     no_whatsapp: "",
@@ -27,7 +27,7 @@ export default function Home({
   });
   const [loadingOrder, setLoadingOrder] = useState(false);
 
-  // Handler Cek Tiket Servis
+  // Handler Cek Nota Servis via Fetch
   const handleCheckTicket = async (e) => {
     e.preventDefault();
     setLoadingTrack(true);
@@ -35,14 +35,15 @@ export default function Home({
     setTrackError(null);
 
     try {
+      const token =
+        document
+          .querySelector('meta[name="csrf-token"]')
+          ?.getAttribute("content") || "";
       const res = await fetch("/track-service", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-CSRF-TOKEN":
-            document
-              .querySelector('meta[name="csrf-token"]')
-              ?.getAttribute("content") || "",
+          "X-CSRF-TOKEN": token,
         },
         body: JSON.stringify({ no_tiket: noTiket }),
       });
@@ -51,34 +52,37 @@ export default function Home({
       if (res.ok) {
         setTrackResult(json.data);
       } else {
-        setTrackError(json.message || "Nomor tiket tidak terdaftar.");
+        setTrackError(
+          json.message || "Nomor tiket tidak terdaftar dalam sistem.",
+        );
       }
     } catch (err) {
-      setTrackError("Terjadi kendala koneksi ke server.");
+      setTrackError("Gagal menghubungkan ke server. Silakan coba kembali.");
     } finally {
       setLoadingTrack(false);
     }
   };
 
-  // Handler Kirim Pesanan
+  // Handler Submit Form Konsultasi
   const handleSubmitOrder = async (e) => {
     e.preventDefault();
     setLoadingOrder(true);
 
     try {
+      const token =
+        document
+          .querySelector('meta[name="csrf-token"]')
+          ?.getAttribute("content") || "";
       const res = await fetch("/order-konsultasi", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-CSRF-TOKEN":
-            document
-              .querySelector('meta[name="csrf-token"]')
-              ?.getAttribute("content") || "",
+          "X-CSRF-TOKEN": token,
         },
         body: JSON.stringify({
           nama_klien: formOrder.nama_klien,
           no_whatsapp: formOrder.no_whatsapp,
-          catatan_kebutuhan: `[${formOrder.layanan || "Umum"}] ${formOrder.catatan_kebutuhan}`,
+          catatan_kebutuhan: `[${formOrder.layanan || "Konsultasi Umum"}] ${formOrder.catatan_kebutuhan}`,
         }),
       });
 
@@ -87,21 +91,22 @@ export default function Home({
         window.open(data.redirect_wa, "_blank");
       }
     } catch (err) {
-      alert("Gagal mengirim data. Silakan hubungi nomor WhatsApp langsung.");
+      alert("Gagal mengirim data. Silakan hubungi langsung ke WhatsApp kami.");
     } finally {
       setLoadingOrder(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 antialiased selection:bg-blue-600 selection:text-white">
-      <Head title="Al-Fatih Solution | Web, Aplikasi, Modul Ajar & Servis IT" />
+    <div className="min-h-screen bg-slate-50 text-slate-800 antialiased selection:bg-blue-600 selection:text-white relative">
+      <Head title="Al-Fatih Solution | Jasa Web, Aplikasi, Modul Ajar & Servis IT" />
 
-      {/* HEADER */}
-      <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200">
+      {/* HEADER / NAVIGATION */}
+      <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200/80 transition-all">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-          <a href="#" className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-extrabold text-xl shadow-lg shadow-blue-500/25">
+          {/* Brand */}
+          <a href="#" className="flex items-center gap-3 group">
+            <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-extrabold text-xl shadow-lg shadow-blue-500/25 group-hover:scale-105 transition-transform">
               A
             </div>
             <div>
@@ -114,9 +119,10 @@ export default function Home({
             </div>
           </a>
 
+          {/* Nav Desktop */}
           <nav className="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-600">
             <a href="#layanan" className="hover:text-blue-600 transition">
-              Layanan Jasa
+              Layanan
             </a>
             <a href="#portofolio" className="hover:text-blue-600 transition">
               Portofolio
@@ -124,20 +130,36 @@ export default function Home({
             <a href="#modul" className="hover:text-blue-600 transition">
               Modul Ajar
             </a>
-            <a href="#informasi" className="hover:text-blue-600 transition">
-              Informasi
-            </a>
+            {posts.length > 0 && (
+              <a href="#informasi" className="hover:text-blue-600 transition">
+                Informasi
+              </a>
+            )}
             <a href="#testimoni" className="hover:text-blue-600 transition">
               Testimoni
             </a>
           </nav>
 
+          {/* Button Header */}
           <div className="hidden md:flex items-center gap-3">
             <button
               onClick={() => setModalTracking(true)}
-              className="px-4 py-2.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition border border-slate-200 flex items-center gap-2"
+              className="px-4 py-2.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition flex items-center gap-2 border border-slate-200"
             >
-              <span>🔍</span> Lacak Servis
+              <svg
+                className="w-4 h-4 text-blue-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2.5"
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+              Lacak Servis
             </button>
             <a
               href="#kontak"
@@ -147,6 +169,7 @@ export default function Home({
             </a>
           </div>
 
+          {/* Hamburger Button */}
           <button
             onClick={() => setMobileMenu(!mobileMenu)}
             className="md:hidden p-2 text-slate-700 hover:bg-slate-100 rounded-xl"
@@ -167,7 +190,7 @@ export default function Home({
           </button>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Mobile Menu Dropdown */}
         {mobileMenu && (
           <div className="md:hidden bg-white border-b border-slate-200 px-6 pt-3 pb-6 space-y-3">
             <a
@@ -191,19 +214,28 @@ export default function Home({
             >
               Modul Ajar
             </a>
+            {posts.length > 0 && (
+              <a
+                onClick={() => setMobileMenu(false)}
+                href="#informasi"
+                className="block py-2 text-sm font-semibold text-slate-700"
+              >
+                Pusat Informasi
+              </a>
+            )}
             <a
               onClick={() => setMobileMenu(false)}
-              href="#informasi"
+              href="#testimoni"
               className="block py-2 text-sm font-semibold text-slate-700"
             >
-              Pusat Informasi
+              Testimoni Klien
             </a>
             <button
               onClick={() => {
                 setModalTracking(true);
                 setMobileMenu(false);
               }}
-              className="w-full text-left py-2 text-sm font-bold text-blue-600"
+              className="w-full text-left py-2.5 text-sm font-bold text-blue-600 flex items-center gap-2"
             >
               🔍 Cek Nota Servis
             </button>
@@ -220,6 +252,9 @@ export default function Home({
 
       {/* HERO SECTION */}
       <section className="relative pt-16 pb-20 md:pt-24 md:pb-32 overflow-hidden bg-gradient-to-b from-blue-50/70 via-white to-slate-50">
+        {/* Background Glow */}
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-96 h-96 bg-blue-400/15 rounded-full blur-3xl pointer-events-none -z-0"></div>
+
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-bold mb-6">
             <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></span>
@@ -254,9 +289,9 @@ export default function Home({
             </button>
           </div>
 
-          {/* Kategori Mini Grid */}
+          {/* 4 Kartu Fitur Ringkas */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto mt-16 pt-10 border-t border-slate-200">
-            <div className="p-4 rounded-2xl bg-white border border-slate-200/80 text-left shadow-sm">
+            <div className="p-5 rounded-2xl bg-white border border-slate-200/80 text-left shadow-sm hover:-translate-y-1 hover:shadow-md transition transform">
               <span className="text-2xl mb-1 block">💻</span>
               <h4 className="font-bold text-slate-900 text-sm">
                 Website Modern
@@ -265,7 +300,7 @@ export default function Home({
                 Sekolah, UMKM, Portal
               </p>
             </div>
-            <div className="p-4 rounded-2xl bg-white border border-slate-200/80 text-left shadow-sm">
+            <div className="p-5 rounded-2xl bg-white border border-slate-200/80 text-left shadow-sm hover:-translate-y-1 hover:shadow-md transition transform">
               <span className="text-2xl mb-1 block">📱</span>
               <h4 className="font-bold text-slate-900 text-sm">
                 Aplikasi Khusus
@@ -274,7 +309,7 @@ export default function Home({
                 Sistem Kasir & Presensi
               </p>
             </div>
-            <div className="p-4 rounded-2xl bg-white border border-slate-200/80 text-left shadow-sm">
+            <div className="p-5 rounded-2xl bg-white border border-slate-200/80 text-left shadow-sm hover:-translate-y-1 hover:shadow-md transition transform">
               <span className="text-2xl mb-1 block">📚</span>
               <h4 className="font-bold text-slate-900 text-sm">
                 Modul Ajar IT
@@ -283,7 +318,7 @@ export default function Home({
                 Materi & LKPD Lengkap
               </p>
             </div>
-            <div className="p-4 rounded-2xl bg-white border border-slate-200/80 text-left shadow-sm">
+            <div className="p-5 rounded-2xl bg-white border border-slate-200/80 text-left shadow-sm hover:-translate-y-1 hover:shadow-md transition transform">
               <span className="text-2xl mb-1 block">🛠️</span>
               <h4 className="font-bold text-slate-900 text-sm">
                 Servis & Jaringan
@@ -296,7 +331,7 @@ export default function Home({
         </div>
       </section>
 
-      {/* SECTION LAYANAN */}
+      {/* SECTION LAYANAN UTAMA */}
       <section
         id="layanan"
         className="py-20 bg-white border-y border-slate-200"
@@ -665,7 +700,7 @@ export default function Home({
         </div>
       </section>
 
-      {/* SECTION INFORMASI / ARTIKEL */}
+      {/* SECTION INFORMASI / ARTIKEL (JIKA ADA POST) */}
       {posts.length > 0 && (
         <section
           id="informasi"
@@ -817,7 +852,7 @@ export default function Home({
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
               <span className="text-xs font-bold uppercase tracking-wider text-blue-400 mb-2 block">
-                Mulai Bersama Kami
+                Konsultasi Terpadu
               </span>
               <h2 className="text-3xl sm:text-4xl font-extrabold leading-tight">
                 Konsultasikan Kebutuhan Anda dengan Tim Ahli Kami
@@ -846,7 +881,7 @@ export default function Home({
               </div>
             </div>
 
-            {/* Form Order Langsung */}
+            {/* Formulir Pemesanan Langsung */}
             <div className="bg-white text-slate-800 p-8 rounded-3xl shadow-2xl">
               <h3 className="text-xl font-bold text-slate-900 mb-1">
                 Formulir Pesanan & Konsultasi
@@ -943,7 +978,7 @@ export default function Home({
                   className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition shadow-md shadow-blue-600/30 flex items-center justify-center gap-2"
                 >
                   {loadingOrder
-                    ? "Memproses Tiket..."
+                    ? "Memproses..."
                     : "Kirim & Sambungkan ke WhatsApp →"}
                 </button>
               </form>
@@ -979,6 +1014,19 @@ export default function Home({
         </div>
       </footer>
 
+      {/* FLOATING WHATSAPP BUTTON */}
+      <a
+        href="https://wa.me/085274817886?text=Halo%20Admin%20Al-Fatih%20Solution,%20saya%20ingin%20konsultasi%20layanan"
+        target="_blank"
+        rel="noreferrer"
+        className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full flex items-center justify-center shadow-xl shadow-emerald-500/30 hover:scale-110 transition-transform"
+        title="Hubungi Admin via WhatsApp"
+      >
+        <svg className="w-8 h-8 fill-current" viewBox="0 0 24 24">
+          <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.771-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.007c.101.005.232-.038.362.275.145.346.491 1.198.534 1.285.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86.173.086.275.072.376-.044.101-.116.433-.506.549-.68.116-.173.231-.144.39-.086s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.099.824zm-3.423-14.416c-6.627 0-12 5.373-12 12 0 2.125.556 4.122 1.523 5.864l-1.623 5.964 6.136-1.609c1.678.916 3.597 1.436 5.632 1.436 6.627 0 12-5.373 12-12 0-6.627-5.373-12-12-12z" />
+        </svg>
+      </a>
+
       {/* MODAL LACAK SERVIS */}
       {modalTracking && (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
@@ -1005,7 +1053,7 @@ export default function Home({
                 value={noTiket}
                 onChange={(e) => setNoTiket(e.target.value.toUpperCase())}
                 placeholder="Contoh: SRV-2026-001"
-                className="flex-1 text-xs px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-600 focus:outline-none font-semibold"
+                className="flex-1 text-xs px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-600 focus:outline-none uppercase font-semibold"
               />
               <button
                 type="submit"
@@ -1016,7 +1064,7 @@ export default function Home({
               </button>
             </form>
 
-            {/* Error */}
+            {/* Error Notif */}
             {trackError && (
               <div className="p-3 bg-rose-50 border border-rose-200 text-rose-600 text-xs rounded-xl mb-3">
                 {trackError}
