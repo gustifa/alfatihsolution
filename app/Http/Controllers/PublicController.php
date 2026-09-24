@@ -9,6 +9,7 @@ use App\Models\Testimonial;
 use App\Models\ServiceTicket;
 use App\Models\ConsultationOrder;
 use App\Models\Post;
+use App\Models\CompanyProfile;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -16,7 +17,20 @@ class PublicController extends Controller
 {
     public function index()
     {
+        $profil = CompanyProfile::first();
+
         return Inertia::render('Home', [
+            'profil' => $profil ? [
+                'nama' => $profil->nama_perusahaan,
+                'slogan' => $profil->slogan,
+                'alamat' => $profil->alamat,
+                'telepon' => $profil->telepon,
+                'email' => $profil->email,
+                'hero_tagline' => $profil->hero_tagline,
+                'hero_title' => $profil->hero_title,
+                'hero_subtitle' => $profil->hero_subtitle,
+                'whatsapp_admin' => $profil->whatsapp_admin ?: ($profil->telepon ? preg_replace('/[^0-9]/', '', $profil->telepon) : '6281234567890'),
+            ] : null,
             'services' => Service::where('is_active', true)->orderBy('urutan')->get(),
             'portfolios' => Portfolio::with('service')->where('is_featured', true)->latest()->take(6)->get(),
             'products' => Product::where('is_active', true)->latest()->take(6)->get(),
@@ -46,7 +60,7 @@ class PublicController extends Controller
                 'status_servis' => ucfirst(str_replace('_', ' ', $ticket->status_servis)),
                 'status_raw' => $ticket->status_servis,
                 'keluhan' => $ticket->keluhan_kerusakan,
-                'tindakan' => $ticket->tindakan_perbaikan ?: 'Perangkat sedang dalam antrean diagnosa teknisi.',
+                'tindakan' => $ticket->tindakan_perbaikan ?: 'Perangkat dalam proses diagnosa oleh teknisi.',
                 'biaya' => 'Rp ' . number_format($ticket->total_biaya, 0, ',', '.'),
                 'status_bayar' => ucfirst($ticket->status_pembayaran),
                 'tanggal_masuk' => $ticket->tanggal_masuk ? $ticket->tanggal_masuk->format('d M Y - H:i') . ' WIB' : '-',
@@ -64,22 +78,31 @@ class PublicController extends Controller
         ]);
 
         $order = ConsultationOrder::create($validated);
+        $layanan = $order->service ? $order->service->nama_layanan : 'Konsultasi IT & Edukasi';
 
-        $layanan = $order->service ? $order->service->nama_layanan : 'Layanan IT / Edukasi';
-        $waAdmin = '6281234567890'; // Ganti nomor WhatsApp tujuan
+        $profil = CompanyProfile::first();
+        $targetWa = $profil && $profil->whatsapp_admin
+            ? preg_replace('/[^0-9]/', '', $profil->whatsapp_admin)
+            : ($profil && $profil->telepon ? preg_replace('/[^0-9]/', '', $profil->telepon) : '6281234567890');
+
+        if (str_starts_with($targetWa, '0')) {
+            $targetWa = '62' . substr($targetWa, 1);
+        }
+
+        $namaPerusahaan = $profil->nama_perusahaan ?? 'Al-Fatih Solution';
 
         $pesan = urlencode(
-            "Halo Tim Al-Fatih Solution,\n\n" .
-            "Saya ingin konsultasi/order layanan:\n" .
-            "• Nama / Instansi: {$order->nama_klien}\n" .
-            "• Layanan: {$layanan}\n" .
-            "• Detail Kebutuhan:\n{$order->catatan_kebutuhan}\n\n" .
-            "Mohon info ketersediaan dan estimasi biayanya. Terima kasih!"
+            "Halo Admin {$namaPerusahaan},\n\n" .
+            "Saya ingin memesan / konsultasi layanan:\n" .
+            "• *Nama / Instansi*: {$order->nama_klien}\n" .
+            "• *Layanan*: {$layanan}\n" .
+            "• *Kebutuhan*:\n{$order->catatan_kebutuhan}\n\n" .
+            "Mohon informasi estimasi biaya dan waktu pengerjaannya. Terima kasih!"
         );
 
         return response()->json([
             'status' => 'success',
-            'redirect_wa' => "https://wa.me/{$waAdmin}?text={$pesan}"
+            'redirect_wa' => "https://wa.me/{$targetWa}?text={$pesan}"
         ]);
     }
 }

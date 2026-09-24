@@ -1,13 +1,34 @@
 import React, { useState } from "react";
 import { Head } from "@inertiajs/react";
+import Swal from "sweetalert2";
 
 export default function Home({
+  profil = null,
   services = [],
   portfolios = [],
   products = [],
   testimonials = [],
   posts = [],
 }) {
+  // Data Profil Perusahaan
+  const company = {
+    nama: profil?.nama || "Al-Fatih Solution",
+    slogan: profil?.slogan || "Software House & IT Solution",
+    alamat: profil?.alamat || "Bukittinggi, Sumatera Barat",
+    telepon: profil?.telepon || "081234567890",
+    email: profil?.email || "admin@alfatihsolution.com",
+    heroTagline:
+      profil?.hero_tagline ||
+      "Solusi Pembuatan Web, Aplikasi, Modul Ajar & Servis IT",
+    heroTitle:
+      profil?.hero_title ||
+      "Tingkatkan Produktivitas Digital & Kebutuhan Teknologi Anda",
+    heroSubtitle:
+      profil?.hero_subtitle ||
+      "Mulai dari perancangan website profesional, aplikasi khusus kasir/sekolah, modul kurikulum merdeka siap pakai, hingga perbaikan komputer transparan dengan tracking nota online.",
+    whatsapp: profil?.whatsapp_admin || "6281234567890",
+  };
+
   // State Navigasi & Modal
   const [mobileMenu, setMobileMenu] = useState(false);
   const [modalTracking, setModalTracking] = useState(false);
@@ -16,23 +37,32 @@ export default function Home({
   const [noTiket, setNoTiket] = useState("");
   const [loadingTrack, setLoadingTrack] = useState(false);
   const [trackResult, setTrackResult] = useState(null);
-  const [trackError, setTrackError] = useState(null);
 
-  // State Formulir Pemesanan & Konsultasi
+  // State Form Pemesanan
   const [formOrder, setFormOrder] = useState({
     nama_klien: "",
     no_whatsapp: "",
-    layanan: "",
+    service_id: "",
     catatan_kebutuhan: "",
   });
   const [loadingOrder, setLoadingOrder] = useState(false);
 
-  // Handler Cek Nota Servis via Fetch
+  // Handler Cek Tiket Servis dengan SweetAlert2
   const handleCheckTicket = async (e) => {
     e.preventDefault();
+
+    if (!noTiket.trim()) {
+      Swal.fire({
+        icon: "warning",
+        title: "Nomor Tiket Kosong",
+        text: "Harap masukkan nomor tiket servis yang tertera di nota Anda!",
+        confirmButtonColor: "#2563eb",
+      });
+      return;
+    }
+
     setLoadingTrack(true);
     setTrackResult(null);
-    setTrackError(null);
 
     try {
       const token =
@@ -51,21 +81,63 @@ export default function Home({
       const json = await res.json();
       if (res.ok) {
         setTrackResult(json.data);
+        Swal.fire({
+          icon: "success",
+          title: "Tiket Ditemukan!",
+          text: `Perangkat: ${json.data.perangkat} - Status: ${json.data.status_servis}`,
+          timer: 2500,
+          showConfirmButton: false,
+        });
       } else {
-        setTrackError(
-          json.message || "Nomor tiket tidak terdaftar dalam sistem.",
-        );
+        Swal.fire({
+          icon: "error",
+          title: "Tidak Ditemukan",
+          text: json.message || "Nomor tiket tidak terdaftar dalam sistem.",
+          confirmButtonColor: "#2563eb",
+        });
       }
     } catch (err) {
-      setTrackError("Gagal menghubungkan ke server. Silakan coba kembali.");
+      Swal.fire({
+        icon: "error",
+        title: "Gangguan Jaringan",
+        text: "Gagal menghubungkan ke server. Silakan coba kembali nanti.",
+        confirmButtonColor: "#2563eb",
+      });
     } finally {
       setLoadingTrack(false);
     }
   };
 
-  // Handler Submit Form Konsultasi
+  // Handler Kirim Form Konsultasi dengan Validasi SweetAlert2
   const handleSubmitOrder = async (e) => {
     e.preventDefault();
+
+    // Validasi format nomor WhatsApp
+    const waPattern = /^(08|628|\+628)[0-9]{8,13}$/;
+    if (!waPattern.test(formOrder.no_whatsapp.trim())) {
+      Swal.fire({
+        icon: "warning",
+        title: "Nomor WhatsApp Tidak Valid",
+        text: "Gunakan awalan 08 atau 628 (contoh: 081234567890).",
+        confirmButtonColor: "#2563eb",
+      });
+      return;
+    }
+
+    // Konfirmasi sebelum pengalihan
+    const confirmResult = await Swal.fire({
+      title: "Kirim Permintaan Konsultasi?",
+      text: "Data Anda akan disimpan dan diteruskan otomatis ke tim WhatsApp kami.",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#2563eb",
+      cancelButtonColor: "#64748b",
+      confirmButtonText: "Ya, Sambungkan ke WA!",
+      cancelButtonText: "Batal",
+    });
+
+    if (!confirmResult.isConfirmed) return;
+
     setLoadingOrder(true);
 
     try {
@@ -79,19 +151,38 @@ export default function Home({
           "Content-Type": "application/json",
           "X-CSRF-TOKEN": token,
         },
-        body: JSON.stringify({
-          nama_klien: formOrder.nama_klien,
-          no_whatsapp: formOrder.no_whatsapp,
-          catatan_kebutuhan: `[${formOrder.layanan || "Konsultasi Umum"}] ${formOrder.catatan_kebutuhan}`,
-        }),
+        body: JSON.stringify(formOrder),
       });
 
       const data = await res.json();
       if (data.redirect_wa) {
-        window.open(data.redirect_wa, "_blank");
+        Swal.fire({
+          icon: "success",
+          title: "Berhasil!",
+          text: "Membuka WhatsApp Admin Al-Fatih Solution...",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+
+        // Reset form
+        setFormOrder({
+          nama_klien: "",
+          no_whatsapp: "",
+          service_id: "",
+          catatan_kebutuhan: "",
+        });
+
+        setTimeout(() => {
+          window.open(data.redirect_wa, "_blank");
+        }, 1000);
       }
     } catch (err) {
-      alert("Gagal mengirim data. Silakan hubungi langsung ke WhatsApp kami.");
+      Swal.fire({
+        icon: "error",
+        title: "Pengiriman Gagal",
+        text: "Terjadi kendala saat menyimpan data pesanan Anda.",
+        confirmButtonColor: "#2563eb",
+      });
     } finally {
       setLoadingOrder(false);
     }
@@ -99,27 +190,25 @@ export default function Home({
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 antialiased selection:bg-blue-600 selection:text-white relative">
-      <Head title="Al-Fatih Solution | Jasa Web, Aplikasi, Modul Ajar & Servis IT" />
+      <Head title={`${company.nama} | ${company.slogan}`} />
 
-      {/* HEADER / NAVIGATION */}
-      <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200/80 transition-all">
+      {/* HEADER */}
+      <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-          {/* Brand */}
           <a href="#" className="flex items-center gap-3 group">
             <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-extrabold text-xl shadow-lg shadow-blue-500/25 group-hover:scale-105 transition-transform">
-              A
+              {company.nama.charAt(0)}
             </div>
             <div>
               <span className="text-xl font-extrabold text-slate-900 tracking-tight block leading-none">
-                Al-Fatih
+                {company.nama}
               </span>
               <span className="text-[10px] font-bold text-blue-600 tracking-widest uppercase">
-                Solution
+                {company.slogan}
               </span>
             </div>
           </a>
 
-          {/* Nav Desktop */}
           <nav className="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-600">
             <a href="#layanan" className="hover:text-blue-600 transition">
               Layanan
@@ -140,26 +229,12 @@ export default function Home({
             </a>
           </nav>
 
-          {/* Button Header */}
           <div className="hidden md:flex items-center gap-3">
             <button
               onClick={() => setModalTracking(true)}
               className="px-4 py-2.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition flex items-center gap-2 border border-slate-200"
             >
-              <svg
-                className="w-4 h-4 text-blue-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2.5"
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
-              Lacak Servis
+              <span>🔍</span> Lacak Servis
             </button>
             <a
               href="#kontak"
@@ -169,7 +244,6 @@ export default function Home({
             </a>
           </div>
 
-          {/* Hamburger Button */}
           <button
             onClick={() => setMobileMenu(!mobileMenu)}
             className="md:hidden p-2 text-slate-700 hover:bg-slate-100 rounded-xl"
@@ -190,7 +264,6 @@ export default function Home({
           </button>
         </div>
 
-        {/* Mobile Menu Dropdown */}
         {mobileMenu && (
           <div className="md:hidden bg-white border-b border-slate-200 px-6 pt-3 pb-6 space-y-3">
             <a
@@ -228,7 +301,7 @@ export default function Home({
               href="#testimoni"
               className="block py-2 text-sm font-semibold text-slate-700"
             >
-              Testimoni Klien
+              Testimoni
             </a>
             <button
               onClick={() => {
@@ -237,7 +310,7 @@ export default function Home({
               }}
               className="w-full text-left py-2.5 text-sm font-bold text-blue-600 flex items-center gap-2"
             >
-              🔍 Cek Nota Servis
+              🔍 Cek Status Servis
             </button>
             <a
               onClick={() => setMobileMenu(false)}
@@ -252,26 +325,20 @@ export default function Home({
 
       {/* HERO SECTION */}
       <section className="relative pt-16 pb-20 md:pt-24 md:pb-32 overflow-hidden bg-gradient-to-b from-blue-50/70 via-white to-slate-50">
-        {/* Background Glow */}
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-96 h-96 bg-blue-400/15 rounded-full blur-3xl pointer-events-none -z-0"></div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-bold mb-6">
             <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></span>
-            Solusi Pembuatan Web, Aplikasi, Modul Ajar & Servis IT
+            {company.heroTagline}
           </div>
 
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight max-w-4xl mx-auto leading-[1.15]">
-            Tingkatkan Produktivitas Digital &{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
-              Kebutuhan Teknologi Anda
-            </span>
+            {company.heroTitle}
           </h1>
 
           <p className="mt-6 text-base sm:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
-            Mulai dari perancangan website profesional, aplikasi khusus
-            kasir/sekolah, modul kurikulum merdeka siap pakai, hingga perbaikan
-            komputer transparan dengan tracking nota online.
+            {company.heroSubtitle}
           </p>
 
           <div className="mt-9 flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -289,7 +356,7 @@ export default function Home({
             </button>
           </div>
 
-          {/* 4 Kartu Fitur Ringkas */}
+          {/* 4 Kartu Mini */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto mt-16 pt-10 border-t border-slate-200">
             <div className="p-5 rounded-2xl bg-white border border-slate-200/80 text-left shadow-sm hover:-translate-y-1 hover:shadow-md transition transform">
               <span className="text-2xl mb-1 block">💻</span>
@@ -331,7 +398,7 @@ export default function Home({
         </div>
       </section>
 
-      {/* SECTION LAYANAN UTAMA */}
+      {/* SECTION: LAYANAN */}
       <section
         id="layanan"
         className="py-20 bg-white border-y border-slate-200"
@@ -347,130 +414,44 @@ export default function Home({
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {/* 1. Website */}
-            <div className="p-8 rounded-3xl bg-slate-50 border border-slate-200 hover:border-blue-400 hover:shadow-xl transition flex flex-col justify-between">
-              <div>
-                <div className="w-14 h-14 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center text-2xl mb-6">
-                  🌐
+            {services.length > 0 ? (
+              services.map((item) => (
+                <div
+                  key={item.id}
+                  className="p-8 rounded-3xl bg-slate-50 border border-slate-200 hover:border-blue-400 hover:shadow-xl transition flex flex-col justify-between"
+                >
+                  <div>
+                    <div className="w-14 h-14 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center text-2xl mb-6">
+                      {item.icon ? <span>{item.icon}</span> : "⚙️"}
+                    </div>
+                    <h3 className="text-xl font-bold text-slate-900 mb-2">
+                      {item.nama_layanan}
+                    </h3>
+                    <p className="text-xs text-slate-600 leading-relaxed mb-6">
+                      {item.deskripsi_singkat}
+                    </p>
+                  </div>
+                  <a
+                    href="#kontak"
+                    onClick={() =>
+                      setFormOrder((prev) => ({ ...prev, service_id: item.id }))
+                    }
+                    className="text-xs font-bold text-blue-600 hover:text-blue-700"
+                  >
+                    Pesan Layanan &rarr;
+                  </a>
                 </div>
-                <h3 className="text-xl font-bold text-slate-900 mb-2">
-                  Pembuatan Website
-                </h3>
-                <p className="text-xs text-slate-600 leading-relaxed mb-6">
-                  Website profil sekolah, instansi, landing page promosi, dan
-                  e-commerce responsif serta mudah dikelola.
-                </p>
-                <ul className="text-xs text-slate-600 space-y-2 mb-6">
-                  <li>✓ Desain Cepat & Mobile Friendly</li>
-                  <li>✓ Panel Admin Filament Mandiri</li>
-                  <li>✓ Integrasi Tombol WhatsApp</li>
-                </ul>
+              ))
+            ) : (
+              <div className="col-span-4 text-center py-8 text-xs text-slate-400">
+                Belum ada data layanan di database.
               </div>
-              <a
-                href="#kontak"
-                onClick={() =>
-                  setFormOrder((prev) => ({
-                    ...prev,
-                    layanan: "Jasa Pembuatan Website",
-                  }))
-                }
-                className="text-xs font-bold text-blue-600 hover:text-blue-700"
-              >
-                Konsultasi Web &rarr;
-              </a>
-            </div>
-
-            {/* 2. Aplikasi */}
-            <div className="p-8 rounded-3xl bg-slate-50 border border-slate-200 hover:border-indigo-400 hover:shadow-xl transition flex flex-col justify-between">
-              <div>
-                <div className="w-14 h-14 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-2xl mb-6">
-                  ⚡
-                </div>
-                <h3 className="text-xl font-bold text-slate-900 mb-2">
-                  Pembuatan Aplikasi
-                </h3>
-                <p className="text-xs text-slate-600 leading-relaxed mb-6">
-                  Pengembangan aplikasi kasir POS, sistem presensi, inventori,
-                  dan database kantor berbasis web custom.
-                </p>
-                <ul className="text-xs text-slate-600 space-y-2 mb-6">
-                  <li>✓ Laravel & React / Inertia</li>
-                  <li>✓ Multi Role & Hak Akses User</li>
-                  <li>✓ Export Rekap Laporan Excel/PDF</li>
-                </ul>
-              </div>
-              <a
-                href="#kontak"
-                onClick={() =>
-                  setFormOrder((prev) => ({
-                    ...prev,
-                    layanan: "Pembuatan Aplikasi Custom",
-                  }))
-                }
-                className="text-xs font-bold text-indigo-600 hover:text-indigo-700"
-              >
-                Buat Aplikasi &rarr;
-              </a>
-            </div>
-
-            {/* 3. Modul Ajar */}
-            <div className="p-8 rounded-3xl bg-slate-50 border border-slate-200 hover:border-emerald-400 hover:shadow-xl transition flex flex-col justify-between">
-              <div>
-                <div className="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-2xl mb-6">
-                  📖
-                </div>
-                <h3 className="text-xl font-bold text-slate-900 mb-2">
-                  Modul Ajar & Bahan IT
-                </h3>
-                <p className="text-xs text-slate-600 leading-relaxed mb-6">
-                  Penyusunan modul kurikulum terstandar, lembar praktikum
-                  jaringan/komputer, dan bahan ajar interaktif.
-                </p>
-                <ul className="text-xs text-slate-600 space-y-2 mb-6">
-                  <li>✓ Format Dokumen Editable (Word/PDF)</li>
-                  <li>✓ Lengkap CP, TP, & Rubrik Asesmen</li>
-                  <li>✓ Praktikum Aplikatif Siap Cetak</li>
-                </ul>
-              </div>
-              <a
-                href="#modul"
-                className="text-xs font-bold text-emerald-600 hover:text-emerald-700"
-              >
-                Buka Katalog &rarr;
-              </a>
-            </div>
-
-            {/* 4. Servis */}
-            <div className="p-8 rounded-3xl bg-slate-50 border border-slate-200 hover:border-amber-400 hover:shadow-xl transition flex flex-col justify-between">
-              <div>
-                <div className="w-14 h-14 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center text-2xl mb-6">
-                  🔧
-                </div>
-                <h3 className="text-xl font-bold text-slate-900 mb-2">
-                  Servis & Maintenance
-                </h3>
-                <p className="text-xs text-slate-600 leading-relaxed mb-6">
-                  Perbaikan laptop/PC lambat, install OS, perakitan lab komputer
-                  sekolah, dan konfigurasi jaringan LAN/Mikrotik.
-                </p>
-                <ul className="text-xs text-slate-600 space-y-2 mb-6">
-                  <li>✓ Cek Nota Servis Transparan Online</li>
-                  <li>✓ Dikerjakan Teknisi Berpengalaman</li>
-                  <li>✓ Garansi Servis Jelas</li>
-                </ul>
-              </div>
-              <button
-                onClick={() => setModalTracking(true)}
-                className="text-xs font-bold text-amber-600 hover:text-amber-700 text-left"
-              >
-                Lacak Nota Servis &rarr;
-              </button>
-            </div>
+            )}
           </div>
         </div>
       </section>
 
-      {/* SECTION PORTOFOLIO */}
+      {/* SECTION: PORTOFOLIO */}
       <section id="portofolio" className="py-20 bg-slate-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-12">
@@ -497,13 +478,19 @@ export default function Home({
                 >
                   <div>
                     <div className="h-48 bg-slate-100 overflow-hidden relative">
-                      <img
-                        src={`/storage/${porto.gambar_utama}`}
-                        alt={porto.judul_proyek}
-                        className="w-full h-full object-cover"
-                      />
+                      {porto.gambar_utama ? (
+                        <img
+                          src={`/storage/${porto.gambar_utama}`}
+                          alt={porto.judul_proyek}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-slate-400 font-bold text-sm bg-slate-100">
+                          Project Demo
+                        </div>
+                      )}
                       <span className="absolute top-3 left-3 text-[10px] font-bold px-2.5 py-1 bg-white/90 backdrop-blur rounded-lg shadow-sm text-slate-800">
-                        {porto.service?.nama_layanan || "Digital"}
+                        {porto.service?.nama_layanan || "Project"}
                       </span>
                     </div>
                     <div className="p-6">
@@ -530,59 +517,15 @@ export default function Home({
                 </div>
               ))
             ) : (
-              <>
-                <div className="bg-white rounded-3xl overflow-hidden border border-slate-200/80 shadow-sm p-6">
-                  <div className="w-full h-44 bg-gradient-to-tr from-blue-100 to-indigo-100 rounded-2xl mb-4 flex items-center justify-center text-blue-600 font-extrabold text-lg">
-                    Web Sekolah CMS
-                  </div>
-                  <span className="text-[10px] font-bold px-2.5 py-1 bg-blue-50 text-blue-700 rounded-md">
-                    Web & Filament
-                  </span>
-                  <h3 className="text-base font-bold text-slate-900 mt-3 mb-1">
-                    Portal Website Profil Sekolah
-                  </h3>
-                  <p className="text-xs text-slate-500">
-                    Sistem informasi manajemen sekolah dilengkapi profil,
-                    berita, dan panel admin terpadu.
-                  </p>
-                </div>
-                <div className="bg-white rounded-3xl overflow-hidden border border-slate-200/80 shadow-sm p-6">
-                  <div className="w-full h-44 bg-gradient-to-tr from-indigo-100 to-purple-100 rounded-2xl mb-4 flex items-center justify-center text-indigo-600 font-extrabold text-lg">
-                    Aplikasi POS Kasir
-                  </div>
-                  <span className="text-[10px] font-bold px-2.5 py-1 bg-indigo-50 text-indigo-700 rounded-md">
-                    Aplikasi Custom
-                  </span>
-                  <h3 className="text-base font-bold text-slate-900 mt-3 mb-1">
-                    Aplikasi Kasir & Inventori Toko
-                  </h3>
-                  <p className="text-xs text-slate-500">
-                    Pencatatan inventori stok barang, struk digital, dan rekapan
-                    omset bulanan otomatis.
-                  </p>
-                </div>
-                <div className="bg-white rounded-3xl overflow-hidden border border-slate-200/80 shadow-sm p-6">
-                  <div className="w-full h-44 bg-gradient-to-tr from-amber-100 to-orange-100 rounded-2xl mb-4 flex items-center justify-center text-amber-600 font-extrabold text-lg">
-                    Maintenance Lab IT
-                  </div>
-                  <span className="text-[10px] font-bold px-2.5 py-1 bg-amber-50 text-amber-700 rounded-md">
-                    Servis & Jaringan
-                  </span>
-                  <h3 className="text-base font-bold text-slate-900 mt-3 mb-1">
-                    Perakitan & Instalasi Lab Komputer
-                  </h3>
-                  <p className="text-xs text-slate-500">
-                    Pengkabelan LAN rapi, konfigurasi mikrotik router, dan
-                    optimasi 25 unit PC lab instansi.
-                  </p>
-                </div>
-              </>
+              <div className="col-span-3 text-center py-8 text-xs text-slate-400">
+                Belum ada portofolio yang ditampilkan.
+              </div>
             )}
           </div>
         </div>
       </section>
 
-      {/* SECTION MODUL AJAR */}
+      {/* SECTION: MODUL AJAR */}
       <section id="modul" className="py-20 bg-white border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-16">
@@ -639,68 +582,15 @@ export default function Home({
                 </div>
               ))
             ) : (
-              <>
-                <div className="bg-slate-50 rounded-2xl p-6 border border-slate-200">
-                  <span className="text-[10px] font-bold px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded">
-                    Modul Ajar
-                  </span>
-                  <h3 className="text-sm font-bold text-slate-900 mt-3 mb-1">
-                    Informatika SMK Fase E
-                  </h3>
-                  <p className="text-xs text-slate-500 mb-4">
-                    Lengkap Capaian Pembelajaran, TP, Asesmen Diagnostik & LKPD
-                    interaktif.
-                  </p>
-                  <a
-                    href="#kontak"
-                    className="block text-center py-2 bg-emerald-600 text-white text-xs font-bold rounded-xl"
-                  >
-                    Pesan Perangkat Ajar
-                  </a>
-                </div>
-                <div className="bg-slate-50 rounded-2xl p-6 border border-slate-200">
-                  <span className="text-[10px] font-bold px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded">
-                    Materi Praktikum
-                  </span>
-                  <h3 className="text-sm font-bold text-slate-900 mt-3 mb-1">
-                    Dasar Jaringan Komputer & LAN
-                  </h3>
-                  <p className="text-xs text-slate-500 mb-4">
-                    Materi kabel jaringan, IP Addressing, subnetting praktis dan
-                    pengujian jaringan.
-                  </p>
-                  <a
-                    href="#kontak"
-                    className="block text-center py-2 bg-emerald-600 text-white text-xs font-bold rounded-xl"
-                  >
-                    Pesan Perangkat Ajar
-                  </a>
-                </div>
-                <div className="bg-slate-50 rounded-2xl p-6 border border-slate-200">
-                  <span className="text-[10px] font-bold px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded">
-                    Source Code
-                  </span>
-                  <h3 className="text-sm font-bold text-slate-900 mt-3 mb-1">
-                    Sistem Manajemen Absensi & Siswa
-                  </h3>
-                  <p className="text-xs text-slate-500 mb-4">
-                    Template aplikasi siap pakai berbasis Laravel dan Filament
-                    Panel.
-                  </p>
-                  <a
-                    href="#kontak"
-                    className="block text-center py-2 bg-emerald-600 text-white text-xs font-bold rounded-xl"
-                  >
-                    Pesan Perangkat Ajar
-                  </a>
-                </div>
-              </>
+              <div className="col-span-3 text-center py-8 text-xs text-slate-400">
+                Belum ada modul produk yang diunggah.
+              </div>
             )}
           </div>
         </div>
       </section>
 
-      {/* SECTION INFORMASI / ARTIKEL (JIKA ADA POST) */}
+      {/* SECTION: INFORMASI (POSTS) */}
       {posts.length > 0 && (
         <section
           id="informasi"
@@ -731,7 +621,7 @@ export default function Home({
                       />
                     ) : (
                       <div className="w-full h-44 bg-slate-100 flex items-center justify-center text-slate-400 font-bold text-xs">
-                        Al-Fatih Insight
+                        {company.nama}
                       </div>
                     )}
                     <div className="p-6">
@@ -752,7 +642,7 @@ export default function Home({
         </section>
       )}
 
-      {/* SECTION TESTIMONI */}
+      {/* SECTION: TESTIMONI */}
       <section id="testimoni" className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-16">
@@ -798,55 +688,15 @@ export default function Home({
                 </div>
               ))
             ) : (
-              <>
-                <div className="bg-slate-50 p-7 rounded-3xl border border-slate-200/80 shadow-sm">
-                  <div className="text-amber-400 text-sm mb-3">★★★★★</div>
-                  <p className="text-xs text-slate-600 italic mb-4">
-                    "Website instansi kami selesai tepat waktu. Panel adminnya
-                    sangat mudah digunakan bahkan untuk staf pemula."
-                  </p>
-                  <span className="text-xs font-bold block text-slate-900">
-                    Drs. M. Zaki, M.Pd
-                  </span>
-                  <span className="text-[10px] text-slate-400">
-                    Kepala Lembaga
-                  </span>
-                </div>
-                <div className="bg-slate-50 p-7 rounded-3xl border border-slate-200/80 shadow-sm">
-                  <div className="text-amber-400 text-sm mb-3">★★★★★</div>
-                  <p className="text-xs text-slate-600 italic mb-4">
-                    "Sangat terbantu dengan fitur cek status nota servis online.
-                    Jadi tidak perlu bolak-balik tanya status laptop lab yang
-                    diservis."
-                  </p>
-                  <span className="text-xs font-bold block text-slate-900">
-                    Irma Marya
-                  </span>
-                  <span className="text-[10px] text-slate-400">
-                    Pengelola Lab
-                  </span>
-                </div>
-                <div className="bg-slate-50 p-7 rounded-3xl border border-slate-200/80 shadow-sm">
-                  <div className="text-amber-400 text-sm mb-3">★★★★★</div>
-                  <p className="text-xs text-slate-600 italic mb-4">
-                    "Modul praktikumnya aplikatif, peserta didik jadi lebih
-                    cepat memahami konsep jaringan berkat lembar kerja yang
-                    terstruktur."
-                  </p>
-                  <span className="text-xs font-bold block text-slate-900">
-                    Gusti F.
-                  </span>
-                  <span className="text-[10px] text-slate-400">
-                    Instruktur IT
-                  </span>
-                </div>
-              </>
+              <div className="col-span-3 text-center py-8 text-xs text-slate-400">
+                Belum ada testimoni dari klien.
+              </div>
             )}
           </div>
         </div>
       </section>
 
-      {/* SECTION KONTAK & ORDER FORM */}
+      {/* SECTION: FORM KONTAK & PESANAN */}
       <section id="kontak" className="py-20 bg-slate-900 text-white relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -868,26 +718,25 @@ export default function Home({
                   <span className="w-8 h-8 rounded-xl bg-slate-800 flex items-center justify-center text-blue-400 font-bold">
                     📍
                   </span>
-                  <span>Workshop & Kantor Operasional: Al-Fatih Solution</span>
+                  <span>{company.alamat}</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="w-8 h-8 rounded-xl bg-slate-800 flex items-center justify-center text-blue-400 font-bold">
                     💬
                   </span>
-                  <span>
-                    Jam Layanan Chat: 08.00 - 21.00 WIB (Senin - Sabtu)
-                  </span>
+                  <span>Jam Layanan: 08.00 - 21.00 WIB (Senin - Sabtu)</span>
                 </div>
               </div>
             </div>
 
-            {/* Formulir Pemesanan Langsung */}
+            {/* Form Konsultasi Dinamis */}
             <div className="bg-white text-slate-800 p-8 rounded-3xl shadow-2xl">
               <h3 className="text-xl font-bold text-slate-900 mb-1">
                 Formulir Pesanan & Konsultasi
               </h3>
               <p className="text-xs text-slate-500 mb-6">
-                Isi formulir ringkas ini untuk terhubung otomatis ke tim teknis.
+                Isi formulir ringkas ini untuk terhubung langsung ke WhatsApp
+                tim teknis kami.
               </p>
 
               <form onSubmit={handleSubmitOrder} className="space-y-4">
@@ -930,28 +779,20 @@ export default function Home({
                   </label>
                   <select
                     required
-                    value={formOrder.layanan}
+                    value={formOrder.service_id}
                     onChange={(e) =>
-                      setFormOrder({ ...formOrder, layanan: e.target.value })
+                      setFormOrder({ ...formOrder, service_id: e.target.value })
                     }
                     className="w-full text-xs px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-600 focus:outline-none"
                   >
-                    <option value="">-- Pilih Layanan --</option>
-                    <option value="Jasa Pembuatan Website">
-                      Jasa Pembuatan Website
+                    <option value="">
+                      -- Pilih Layanan yang Dibutuhkan --
                     </option>
-                    <option value="Pembuatan Aplikasi Custom">
-                      Pembuatan Aplikasi Custom
-                    </option>
-                    <option value="Pemesanan Modul Ajar IT">
-                      Pemesanan Modul Ajar IT
-                    </option>
-                    <option value="Servis Laptop & Perangkat">
-                      Servis Komputer / Laptop
-                    </option>
-                    <option value="Instalasi Jaringan & Maintenance">
-                      Instalasi Jaringan & Maintenance
-                    </option>
+                    {services.map((item) => (
+                      <option key={item.id} value={item.id}>
+                        {item.nama_layanan}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 <div>
@@ -978,7 +819,7 @@ export default function Home({
                   className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition shadow-md shadow-blue-600/30 flex items-center justify-center gap-2"
                 >
                   {loadingOrder
-                    ? "Memproses..."
+                    ? "Menghubungkan..."
                     : "Kirim & Sambungkan ke WhatsApp →"}
                 </button>
               </form>
@@ -990,7 +831,9 @@ export default function Home({
       {/* FOOTER */}
       <footer className="bg-slate-950 text-slate-400 py-8 border-t border-slate-800 text-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p>© 2026 Al-Fatih Solution. All rights reserved.</p>
+          <p>
+            © {new Date().getFullYear()} {company.nama}. All rights reserved.
+          </p>
           <div className="flex items-center gap-6">
             <a
               href="/admin/login"
@@ -1016,7 +859,7 @@ export default function Home({
 
       {/* FLOATING WHATSAPP BUTTON */}
       <a
-        href="https://wa.me/085274817886?text=Halo%20Admin%20Al-Fatih%20Solution,%20saya%20ingin%20konsultasi%20layanan"
+        href={`https://wa.me/${company.whatsapp}?text=Halo%20Admin%20${encodeURIComponent(company.nama)},%20saya%20ingin%20konsultasi%20layanan`}
         target="_blank"
         rel="noreferrer"
         className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full flex items-center justify-center shadow-xl shadow-emerald-500/30 hover:scale-110 transition-transform"
@@ -1064,13 +907,6 @@ export default function Home({
               </button>
             </form>
 
-            {/* Error Notif */}
-            {trackError && (
-              <div className="p-3 bg-rose-50 border border-rose-200 text-rose-600 text-xs rounded-xl mb-3">
-                {trackError}
-              </div>
-            )}
-
             {/* Hasil Lacak */}
             {trackResult && (
               <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs space-y-2.5">
@@ -1100,7 +936,7 @@ export default function Home({
                 </div>
                 <div className="pt-1">
                   <span className="text-slate-500 block mb-1">
-                    Catatan Pengerjaan / Tindakan:
+                    Catatan Pengerjaan:
                   </span>
                   <p className="font-medium text-slate-700 bg-white p-3 rounded-xl border border-slate-200 leading-relaxed">
                     {trackResult.tindakan}

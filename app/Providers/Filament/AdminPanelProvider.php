@@ -17,11 +17,9 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
-use BezhanSalleh\FilamentShield\FilamentShieldPlugin; // <-- 1. Tambahkan import ini di atas
-// use App\Filament\Pages\Auth\CustomLogin; // Tambahkan ini di bagian atas (use)
+use Illuminate\Support\Facades\Blade;
+use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use App\Filament\Widgets\DashboardStatsOverview;
-
-
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -39,15 +37,10 @@ class AdminPanelProvider extends PanelProvider
                 'Sistem',
             ])
             ->login()
-            // ->login(CustomLogin::class) // GANTI MENJADI INI
-            ->brandName(fn () => \App\Models\ProfilSekolah::first()?->nama_sekolah ?? 'Portal Admin')
-            // ->brandName('SMK N 1 Bukittinggi') // Tambahkan baris ini
-            // Tambahkan baris ini untuk Favicon Dinamis
+            ->brandName(fn () => \App\Models\CompanyProfile::first()?->nama_perusahaan ?? 'Al-Fatih Solution')
             ->favicon(function () {
-                // Ubah 'logo_sekolah' sesuai dengan nama kolom gambar logo di tabel Anda
-                $logo = \App\Models\ProfilSekolah::first()?->favicon;
+                $logo = \App\Models\CompanyProfile::first()?->favicon ?? null;
 
-                // Jika ada logo di database, gunakan itu. Jika kosong, gunakan favicon bawaan web.
                 return $logo ? asset('storage/' . $logo) : asset('favicon.ico');
             })
             ->colors([
@@ -61,8 +54,6 @@ class AdminPanelProvider extends PanelProvider
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
                 Widgets\AccountWidget::class,
-                // Widgets\FilamentInfoWidget::class,
-                // DashboardStatsOverview::class,
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -79,7 +70,28 @@ class AdminPanelProvider extends PanelProvider
                 Authenticate::class,
             ])
             ->plugins([
-                FilamentShieldPlugin::make() // <-- 2. Daftarkan plugin di sini
-            ]);
+                FilamentShieldPlugin::make()
+            ])
+            ->renderHook(
+                'panels::body.end',
+                fn (): string => Blade::render('
+                    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+                    <script>
+                        document.addEventListener("DOMContentLoaded", () => {
+                            window.addEventListener("swal", (event) => {
+                                const data = event.detail[0] || event.detail;
+                                Swal.fire({
+                                    icon: data.icon || "info",
+                                    title: data.title || "Pemberitahuan",
+                                    text: data.text || "",
+                                    timer: data.timer || null,
+                                    showConfirmButton: data.showConfirmButton ?? true,
+                                    confirmButtonColor: "#2563eb",
+                                });
+                            });
+                        });
+                    </script>
+                ')
+            );
     }
 }
