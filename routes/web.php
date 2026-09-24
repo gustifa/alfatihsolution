@@ -110,4 +110,8 @@ Route::get('/siswa', function () {
     ]);
 });
 
+Route::get('/', [PublicController::class, 'index'])->name('home');
+Route::post('/track-service', [PublicController::class, 'trackService'])->name('service.track');
+Route::post('/order-konsultasi', [PublicController::class, 'order'])->name('order.store');
+
 
