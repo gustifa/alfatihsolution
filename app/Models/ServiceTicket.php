@@ -10,7 +10,8 @@ class ServiceTicket extends Model
 {
     use HasFactory;
 
-    protected $guarded = ['id'];
+    // protected $guarded = ['id'];
+    protected $guarded = [];
 
     protected $casts = [
         'biaya_sparepart' => 'decimal:2',

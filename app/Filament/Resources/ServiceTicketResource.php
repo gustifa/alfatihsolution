@@ -12,6 +12,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Tables\Actions\Action;
 
 class ServiceTicketResource extends Resource
 {
@@ -106,6 +107,15 @@ class ServiceTicketResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                // TAMBAH BUTANG CETAK TIKET DI SINI:
+                Action::make('print')
+                    ->label('Print')
+                    ->icon('heroicon-o-printer')
+                    ->color('success')
+                    ->url(fn (ServiceTicket $record): string => route('service-tickets.print', $record))
+                    ->openUrlInNewTab(),
+
+                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

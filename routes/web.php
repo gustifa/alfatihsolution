@@ -14,6 +14,7 @@ use App\Models\Siswa;
 use App\Models\Rombel;            // Sesuaikan dengan model rombongan belajar Anda
 use Illuminate\Support\Facades\Schema;
 use App\Http\Controllers\TrackingController;
+use App\Models\ServiceTicket;
 
 // Route::get('/', [PublicController::class, 'home'])->name('home');
 Route::get('/', function () {
@@ -117,5 +118,10 @@ Route::post('/order-konsultasi', [PublicController::class, 'order'])->name('orde
 
 
 Route::post('/track-service', [TrackingController::class, 'track'])->name('track.service');
+
+Route::get('/admin/service-tickets/{record}/print', function ($record) {
+    $ticket = ServiceTicket::findOrFail($record);
+    return view('print.service-ticket', compact('ticket'));
+})->name('service-tickets.print')->middleware(['auth']);
 
 
