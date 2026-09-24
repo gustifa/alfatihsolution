@@ -3,22 +3,30 @@ import React from "react";
 export default function HeroSection({ company, onOpenTracking }) {
   return (
     <section className="relative pt-16 pb-20 md:pt-24 md:pb-32 overflow-hidden bg-gradient-to-b from-blue-50/70 via-white to-slate-50">
+      {/* Efek Lingkaran Blur Latar Belakang */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-96 h-96 bg-blue-400/15 rounded-full blur-3xl pointer-events-none -z-0"></div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-bold mb-6">
+        {/* Tagline Badge */}
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-bold mb-6 shadow-sm">
           <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></span>
-          {company.heroTagline}
+          {company?.heroTagline ||
+            "Solusi Pembuatan Web, Aplikasi, Modul Ajar & Servis IT"}
         </div>
 
-        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight max-w-4xl mx-auto leading-[1.15]">
-          {company.heroTitle}
+        {/* Judul Utama */}
+        <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight max-w-4xl mx-auto leading-[1.15]">
+          {company?.heroTitle ||
+            "Tingkatkan Produktivitas Digital & Kebutuhan Teknologi Anda"}
         </h1>
 
-        <p className="mt-6 text-base sm:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
-          {company.heroSubtitle}
+        {/* Subtitle */}
+        <p className="mt-6 text-sm sm:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
+          {company?.heroSubtitle ||
+            "Mulai dari perancangan website profesional, aplikasi khusus kasir/sekolah, modul kurikulum merdeka siap pakai, hingga perbaikan komputer transparan."}
         </p>
 
+        {/* Tombol Panggilan Aksi (CTA) */}
         <div className="mt-9 flex flex-col sm:flex-row items-center justify-center gap-4">
           <a
             href="#kontak"
@@ -27,6 +35,7 @@ export default function HeroSection({ company, onOpenTracking }) {
             Pesan Layanan / Konsultasi &rarr;
           </a>
           <button
+            type="button"
             onClick={onOpenTracking}
             className="w-full sm:w-auto px-8 py-4 bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 font-bold text-sm rounded-2xl shadow-sm transition flex items-center justify-center gap-2"
           >
@@ -34,6 +43,7 @@ export default function HeroSection({ company, onOpenTracking }) {
           </button>
         </div>
 
+        {/* 4 Pilar Kartu Layanan Unggulan */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto mt-16 pt-10 border-t border-slate-200">
           <div className="p-5 rounded-2xl bg-white border border-slate-200/80 text-left shadow-sm hover:-translate-y-1 hover:shadow-md transition transform">
             <span className="text-2xl mb-1 block">💻</span>

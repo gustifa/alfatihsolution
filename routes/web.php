@@ -13,6 +13,7 @@ use App\Models\ProgramKeahlian; // Tambahkan ini
 use App\Models\Siswa;
 use App\Models\Rombel;            // Sesuaikan dengan model rombongan belajar Anda
 use Illuminate\Support\Facades\Schema;
+use App\Http\Controllers\TrackingController;
 
 // Route::get('/', [PublicController::class, 'home'])->name('home');
 Route::get('/', function () {
@@ -113,5 +114,8 @@ Route::get('/siswa', function () {
 Route::get('/', [PublicController::class, 'index'])->name('home');
 Route::post('/track-service', [PublicController::class, 'trackService'])->name('service.track');
 Route::post('/order-konsultasi', [PublicController::class, 'order'])->name('order.store');
+
+
+Route::post('/track-service', [TrackingController::class, 'track'])->name('track.service');
 
 
