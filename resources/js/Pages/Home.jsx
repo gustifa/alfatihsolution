@@ -11,6 +11,7 @@ import ProductsSection from "./HomeSections/ProductsSection";
 import TestimonialsSection from "./HomeSections/TestimonialsSection";
 import ContactSection from "./HomeSections/ContactSection";
 import TrackingModal from "./HomeSections/TrackingModal";
+import ScrollToTop from "./HomeSections/ScrollToTop";
 
 export default function Home({
   profil = null,
@@ -285,7 +286,10 @@ export default function Home({
         </svg>
       </a>
 
-      {/* 10. Modal Interaktif Lacak Servis */}
+      {/* 10. Tombol Menggulung ke Atas (Scroll to Top) */}
+      <ScrollToTop />
+
+      {/* 11. Modal Interaktif Lacak Servis */}
       <TrackingModal
         isOpen={modalTracking}
         onClose={() => setModalTracking(false)}
