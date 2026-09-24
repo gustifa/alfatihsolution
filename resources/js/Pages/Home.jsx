@@ -229,7 +229,7 @@ export default function Home({
       <PortfoliosSection portfolios={portfolios} />
 
       {/* 5. Seksi Katalog Modul Ajar & Produk IT */}
-      <ProductsSection products={products} />
+      <ProductsSection products={products} company={company} />
 
       {/* 6. Seksi Ulasan & Testimoni Klien */}
       <TestimonialsSection testimonials={testimonials} />
